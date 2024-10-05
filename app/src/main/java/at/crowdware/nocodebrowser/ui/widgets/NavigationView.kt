@@ -21,6 +21,7 @@ package at.crowdware.nocodebrowser.ui.widgets
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -42,9 +43,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -52,7 +54,7 @@ import at.crowdware.nocodebrowser.MainActivity
 import at.crowdware.nocodebrowser.R
 import at.crowdware.nocodebrowser.ui.theme.OnPrimary
 import at.crowdware.nocodebrowser.ui.theme.Primary
-import at.crowdware.nocodebrowser.view.Home
+import at.crowdware.nocodebrowser.view.LoadPage
 import kotlinx.coroutines.launch
 import java.io.BufferedWriter
 import java.io.File
@@ -64,6 +66,7 @@ import java.io.IOException
 fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivity) {
     val navController = rememberNavController()
     val selectedItem = remember { mutableStateOf("home") }
+    var navhostBackground = remember { mutableStateOf(Color.White) }
 
     NavigationManager.setNavController(navController)
     val title = remember { mutableStateOf("NoCodeBrowser") }
@@ -71,20 +74,27 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
     val context = LocalContext.current
     val pluginName = remember { mutableStateOf("App") }
 
-    NavHost(navController = navController, startDestination = "home") {
+    NavHost(navController = navController, startDestination = "home", modifier = Modifier.background(color = navhostBackground.value)) {
         for (index in items.indices) {
             composable(items[index].id) {
                 when (items[index].id) {
                     "home" -> {
-                        title.value = "NoCodeBrowser";navTarget.value = ""
+                        title.value = "NoCodeBrowser"
+                        navTarget.value = ""
+                    }
+                    "about" -> {
+                        title.value = "About"
+                        navTarget.value = ""
                     }
 
                     "settings" -> {
-                        title.value = stringResource(R.string.settings);navTarget.value = ""
+                        title.value = stringResource(R.string.settings)
+                        navTarget.value = ""
                     }
 
                     else -> {
-                        title.value = items[index].text;navTarget.value = ""
+                        title.value = items[index].text
+                        navTarget.value = ""
                     }
                 }
                 runCatching {
@@ -92,7 +102,8 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
                     NavigationDrawer(items, selectedItem, title.value, navTarget.value) {
                         when (items[index].id) {
                             // have a look at MainActivity for navigation
-                            "home" -> Home("home")
+                            "home" -> LoadPage("home", navhostBackground)
+                            "about" -> LoadPage("about", navhostBackground)
                             //"settings" -> Settings()
 
                             else -> {
