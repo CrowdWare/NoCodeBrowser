@@ -68,5 +68,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation("androidx.navigation:navigation-compose:2.6.0")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation(files("libs/nocodeLib-debug.aar"))
 }

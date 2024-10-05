@@ -92,7 +92,7 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
                     NavigationDrawer(items, selectedItem, title.value, navTarget.value) {
                         when (items[index].id) {
                             // have a look at MainActivity for navigation
-                            "home" -> Home("Test")
+                            "home" -> Home("home")
                             //"settings" -> Settings()
 
                             else -> {

@@ -1,16 +1,18 @@
 package at.crowdware.nocodebrowser.view
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -20,24 +22,22 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import at.crowdware.nocodebrowser.ui.theme.NoCodeBrowserTheme
-import at.crowdware.nocodelib.ButtonElement
-import at.crowdware.nocodelib.ColumnElement
-import at.crowdware.nocodelib.ImageElement
-import at.crowdware.nocodelib.MarkdownElement
-import at.crowdware.nocodelib.Page
-import at.crowdware.nocodelib.PageParser
-import at.crowdware.nocodelib.RowElement
-import at.crowdware.nocodelib.SoundElement
-import at.crowdware.nocodelib.SpacerElement
-import at.crowdware.nocodelib.TextElement
-import at.crowdware.nocodelib.UIElement
-import at.crowdware.nocodelib.VideoElement
-import at.crowdware.nocodelib.YoutubeElement
-
+import at.crowdware.nocodelib.Padding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import org.w3c.dom.Node
+import java.io.ByteArrayInputStream
+import java.io.IOException
+import javax.xml.parsers.DocumentBuilderFactory
 
 fun hexToColor(hex: String): Color {
     val color = hex.trimStart('#')
@@ -61,65 +61,85 @@ fun hexToColor(hex: String): Color {
     }
 }
 
-@Composable
-fun Home(name: String, modifier: Modifier = Modifier) {
-    // parsing
-    var parseError = ""
-    val xml = "<page><column padding='16'><markdown># Title</markdown><spacer height='8'/><button label='about'/></column></page>"
-    val parsedPage = try {
-        if (xml.isEmpty()) {
-            parseError = "no page loaded"
-            null
+fun downloadXml(url: String): String? {
+    val client = OkHttpClient()
+    val request = Request.Builder()
+        .url(url)
+        .build()
+
+    return try {
+        val response: Response = client.newCall(request).execute()
+        if (response.isSuccessful) {
+            response.body?.string()
         } else {
-            if(xml.contains("<page")) {
-                val pageParser = PageParser()
-                val page = pageParser.parse(xml)
-                println("page: $page")
-                if (page.elements.isEmpty()) {
-                    parseError = "page is empty"
-                    null
-                } else {
-                    page
-                }
-            } else if (xml.contains("<app")) {
-                println("app loaded")
-                null
-            } else {
-                parseError = "no page loaded"
-                null
-            }
+            null
         }
-    } catch (e: Exception) {
-        parseError = e.message ?: ""
-        println("Error parsing xml: ${e.message}")
+    } catch (e: IOException) {
+        e.printStackTrace()
         null
     }
+}
 
-    // rendering
-    if (parsedPage != null) {
-        println("padding: ${parsedPage.padding.left}")
-        Row (modifier = Modifier
-            .padding(start = parsedPage.padding.left.dp, top = parsedPage.padding.top.dp, bottom = parsedPage.padding.bottom.dp, end = parsedPage.padding.right.dp )
-            .fillMaxSize()
-            .background(color = hexToColor(parsedPage.backgroundColor))) {
-            RenderPage(parsedPage)
+fun getRootElement(xml: String): Element? {
+    return try {
+        val factory = DocumentBuilderFactory.newInstance()
+        val builder = factory.newDocumentBuilder()
+        val inputStream = ByteArrayInputStream(xml.toByteArray(Charsets.UTF_8))
+        val document: Document = builder.parse(inputStream)
+        document.documentElement.normalize()
+        document.documentElement
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
+fun Home(name: String, modifier: Modifier = Modifier) {
+    var page by remember { mutableStateOf(getRootElement("<page><column padding='16'><text color='#FFFFFF'>One moment, page loading...</text></column></page>")) }
+
+    LaunchedEffect(Unit) {
+        val xmlContent = withContext(Dispatchers.IO) {
+            downloadXml("https://nocode.crowdware.at/pages/home.xml")
         }
-    } else {
-        Row{
-            Text(text = parseError, color = Color.Red)
+        if (xmlContent != null) {
+            page = getRootElement(xmlContent)
+        } else {
+            page = getRootElement("<page><column padding='16'><text color='#FF0000'>An error occurred loading the home page.</text></column></page>")
         }
+    }
+
+    if(page != null) {
+        val padding = parsePadding( page!!.getAttribute("padding"))
+        val bgColor = page!!.getAttribute("backgroundColor")
+        Row(
+            modifier = Modifier
+                .padding(
+                    start = padding.left.dp,
+                    top = padding.top.dp,
+                    bottom = padding.bottom.dp,
+                    end = padding.right.dp
+                )
+                .fillMaxSize()
+                .background(color = hexToColor(bgColor))
+        ) {
+            RenderElement(page!!) }
     }
 }
 
-@Composable
-fun RenderPage(page: Page) {
-    for (element in page.elements) {
-        RenderUIElement(element)
+fun parsePadding(padding: String): Padding {
+    val paddingValues = padding.split(" ").mapNotNull { it.toIntOrNull() }
+
+    return when (paddingValues.size) {
+        1 -> Padding(paddingValues[0], paddingValues[0], paddingValues[0], paddingValues[0]) // Alle Seiten gleich
+        2 -> Padding(paddingValues[0], paddingValues[1], paddingValues[0], paddingValues[1]) // Vertikal und Horizontal gleich
+        4 -> Padding(paddingValues[0], paddingValues[1], paddingValues[2], paddingValues[3]) // Oben, Rechts, Unten, Links
+        else -> Padding(0, 0, 0, 0)
     }
 }
-
+/*
 @Composable
-fun RenderUIElement(element: UIElement) {
+fun RenderUIElement(element: Element) {
     when (element) {
         is TextElement -> {
             Text(
@@ -129,7 +149,7 @@ fun RenderUIElement(element: UIElement) {
         }
         is MarkdownElement -> {
             val parsedMarkdown = parseMarkdown(element.text)
-
+            println("sax: $parsedMarkdown")
             Text(
                 text = parsedMarkdown,
                 style = TextStyle(color = hexToColor(element.color))
@@ -185,6 +205,7 @@ fun RenderUIElement(element: UIElement) {
         }
     }
 }
+*/
 
 fun handleButtonClick(link: String) {
     when {
@@ -204,24 +225,24 @@ fun handleButtonClick(link: String) {
 
 @Composable
 fun dynamicImageFromAssets(filename: String, scale: String, link: String) {
-
+    // TODO: load Image from webserver
 }
 @Composable
 fun dynamicSoundfromAssets(filename: String) {
-
+    // TODO: load Sound from webserver
 }
 @Composable
 fun dynamicVideofromAssets(filename: String, height: Int) {
-
+    // TODO: load Video from webserver
 }
 @Composable
 fun dynamicYoutube(height: Int) {
-
+    // TODO: load Youtube
 }
 
 fun parseMarkdown(markdown: String): AnnotatedString {
     val builder = AnnotatedString.Builder()
-    val lines = markdown.split("\n") // Verarbeite alle Zeilen
+    val lines = markdown.split("\n")
 
     for (i in lines.indices) {
         val line = lines[i]
@@ -331,11 +352,77 @@ fun parseMarkdown(markdown: String): AnnotatedString {
             }
         }
 
-        // Füge Zeilenumbrüche nur zwischen den Zeilen hinzu, nicht am Ende
         if (i < lines.size - 1) {
             builder.append("\n")
         }
     }
 
     return builder.toAnnotatedString()
+}
+
+
+@Composable
+fun RenderElement(element: Element) {
+    when(element.tagName) {
+        "page" -> {
+            for (i in 0 until element.childNodes.length) {
+                val childNode: Node = element.childNodes.item(i)
+                if (childNode.nodeType == Node.ELEMENT_NODE) {
+                    val childElement = childNode as Element
+                    RenderElement(childElement)
+                }
+            }
+        }
+        "column" -> {
+            val padding = parsePadding(element.getAttribute("padding"))
+            Column(modifier = Modifier.padding(
+                top = padding.top.dp,
+                bottom = padding.bottom.dp,
+                start = padding.left.dp,
+                end = padding.right.dp
+            )) {
+                for (i in 0 until element.childNodes.length) {
+                    val childNode: Node = element.childNodes.item(i)
+                    if (childNode.nodeType == Node.ELEMENT_NODE) {
+                        val childElement = childNode as Element
+                        RenderElement(childElement)
+                    }
+                }
+            }
+        }
+        "row" -> {
+            val padding = parsePadding(element.getAttribute("padding"))
+            Row(modifier = Modifier.padding(
+                top = padding.top.dp,
+                bottom = padding.bottom.dp,
+                start = padding.left.dp,
+                end = padding.right.dp
+            )) {
+                for (i in 0 until element.childNodes.length) {
+                    val childNode: Node = element.childNodes.item(i)
+                    if (childNode.nodeType == Node.ELEMENT_NODE) {
+                        val childElement = childNode as Element
+                        RenderElement(childElement)
+                    }
+                }
+            }
+        }
+        "text" -> {
+            Text(
+
+                text = element.textContent.trim(),
+                style = TextStyle(color = hexToColor(element.getAttribute("color")))
+            )
+        }
+        "markdown" -> {
+            val parsedMarkdown = parseMarkdown(element.textContent.trim())
+            Text(
+                text = parsedMarkdown,
+                style = TextStyle(color = hexToColor(element.getAttribute("color")))
+            )
+        }
+        "image" -> {
+            dynamicImageFromAssets(filename = element.getAttribute("srv"), element.getAttribute("scale"), element.getAttribute("link"))
+        }
+    }
 }
