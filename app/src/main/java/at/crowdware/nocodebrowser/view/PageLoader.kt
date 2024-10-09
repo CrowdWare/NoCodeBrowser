@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import at.crowdware.nocodebrowser.MainActivity
+import at.crowdware.nocodebrowser.parsePage
 import at.crowdware.nocodebrowser.ui.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -57,7 +58,7 @@ fun LoadPage(name: String, navhostBackground: MutableState<Color>) {
             page = parsePage(qmlContent)
         } else {
             println("load failed...")
-            page = parsePage("Page { Column { padding: '16' Text { color: '#FF0000' text:'An error occurred loading the home page.'}}}")
+            page = parsePage("Page { Column { padding: \"16\" Text { color: \"#FF0000\" fontSize: 18 text:\"An error occurred loading the home page.\"}}}")
         }
         isLoading = false
     }
@@ -124,7 +125,8 @@ fun RenderElement(element: UIElement) {
         is TextElement -> {
             Text(
                 text = element.text.trim(),
-                style = TextStyle(color = hexToColor(element.color))
+                fontSize = element.fontSize,
+                style = TextStyle(color = element.color)
             )
         }
         is MarkdownElement -> {

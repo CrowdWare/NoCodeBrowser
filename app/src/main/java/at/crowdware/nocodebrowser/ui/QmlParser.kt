@@ -1,12 +1,28 @@
-package at.crowdware.nocodebrowser.ui
+package at.crowdware.nocodebrowser
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import at.crowdware.nocodebrowser.ui.App
+import at.crowdware.nocodebrowser.ui.ButtonElement
+import at.crowdware.nocodebrowser.ui.ColumnElement
+import at.crowdware.nocodebrowser.ui.ImageElement
+import at.crowdware.nocodebrowser.ui.MarkdownElement
+import at.crowdware.nocodebrowser.ui.Padding
+import at.crowdware.nocodebrowser.ui.Page
+import at.crowdware.nocodebrowser.ui.RowElement
+import at.crowdware.nocodebrowser.ui.SoundElement
+import at.crowdware.nocodebrowser.ui.SpacerElement
+import at.crowdware.nocodebrowser.ui.TextElement
+import at.crowdware.nocodebrowser.ui.UIElement
+import at.crowdware.nocodebrowser.ui.VideoElement
+import at.crowdware.nocodebrowser.ui.YoutubeElement
+import at.crowdware.nocodebrowser.ui.hexToColor
+import at.crowdware.nocodebrowser.ui.parsePadding
 import com.github.h0tk3y.betterParse.combinators.and
 import com.github.h0tk3y.betterParse.combinators.map
-import com.github.h0tk3y.betterParse.combinators.or
 import com.github.h0tk3y.betterParse.combinators.oneOrMore
+import com.github.h0tk3y.betterParse.combinators.or
 import com.github.h0tk3y.betterParse.combinators.zeroOrMore
 import com.github.h0tk3y.betterParse.grammar.Grammar
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
@@ -17,6 +33,7 @@ import com.github.h0tk3y.betterParse.lexer.literalToken
 import com.github.h0tk3y.betterParse.lexer.regexToken
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.github.h0tk3y.betterParse.utils.Tuple7
+
 
 sealed class PropertyValue {
     data class StringValue(val value: String) : PropertyValue()
@@ -120,12 +137,29 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
 
                 when (elementName) {
                     "Text" -> {
-                        elements.add(TextElement(
+                        elements.add(
+                            TextElement(
                             text = (properties["text"] as? PropertyValue.StringValue)?.value ?: "def",
-                            color = (properties["color"] as? PropertyValue.StringValue)?.value ?: "",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Left))
+                            color = hexToColor((properties["color"] as? PropertyValue.StringValue)?.value ?: ""),
+                            fontSize = ((properties["fontSize"] as? PropertyValue.IntValue)?.value ?: 14).sp,
+                            fontWeight = when((properties["fontWeight"] as? PropertyValue.StringValue)?.value ?: "") {
+                                "bold" -> { FontWeight.Bold }
+                                "black" -> { FontWeight.Black }
+                                "thin" -> { FontWeight.Thin }
+                                "extrabold" -> { FontWeight.ExtraBold }
+                                "extralight" -> { FontWeight.ExtraLight }
+                                "light" -> { FontWeight.Light }
+                                "medium" -> { FontWeight.Medium }
+                                "semibold" -> { FontWeight.SemiBold }
+                                else -> { FontWeight.Normal }
+                            },
+                            textAlign = when((properties["textAlign"] as? PropertyValue.StringValue)?.value ?: "") {
+                                "left" -> { TextAlign.Start }
+                                "center" -> { TextAlign.Center }
+                                "right" -> { TextAlign.End }
+                                else -> { TextAlign.Unspecified }
+                            })
+                        )
                     }
                     "Column" -> {
                         val col = ColumnElement(padding = parsePadding((properties["padding"] as? PropertyValue.StringValue)?.value ?: "0"))

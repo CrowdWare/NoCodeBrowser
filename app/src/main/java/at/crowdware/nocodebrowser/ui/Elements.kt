@@ -19,6 +19,7 @@
 
 package at.crowdware.nocodebrowser.ui
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
@@ -27,7 +28,7 @@ import androidx.compose.ui.unit.TextUnit
 data class Page(var color: String, var backgroundColor: String, var padding: Padding, val elements: MutableList<UIElement>)
 data class App(val type: String, val items: MutableList<String>)
 sealed class UIElement
-data class TextElement(val text: String, val color: String, val fontSize: TextUnit, val fontWeight: FontWeight, val textAlign: TextAlign) : UIElement()
+data class TextElement(val text: String, val color: Color, val fontSize: TextUnit, val fontWeight: FontWeight, val textAlign: TextAlign) : UIElement()
 data class ButtonElement(val label: String, val link: String) : UIElement()
 data class ImageElement(val src: String, val scale: String, val link: String) : UIElement()
 data class SpacerElement(val height: Int) : UIElement()
