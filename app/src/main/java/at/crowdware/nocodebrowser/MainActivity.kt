@@ -30,11 +30,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        cache = Cache(this.cacheDir, cacheSize.toLong())
+        cache = Cache(cacheDir, cacheSize.toLong())
         okHttpClient = OkHttpClient.Builder()
             .cache(cache)
             .build()
-
 
         enableEdgeToEdge()
         setContent {
@@ -48,11 +47,6 @@ class MainActivity : ComponentActivity() {
                     )
 
                     // navigation targets which are not listed in the drawer
-                    //list.add(NavigationItem(id="receive_gratitude_qrcode"))
-                    //list.add(NavigationItem(id="receive_gratitude"))
-                    //list.add(NavigationItem(id="give_gratitude"))
-                    //list.add(NavigationItem(id="give_gratitude_qrcode"))
-                    //list.add(NavigationItem(id="scan_agreement"))
                     list.add(NavigationItem(id="video"))
                     NavigationView(list, this)
                 }
@@ -60,7 +54,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun downloadXml(url: String): String? {
+    // TODO: use deployment descriptor (App.xml) for caching files
+    fun downloadQml(url: String): String? {
         val request = Request.Builder()
             .url(url)
             .build()

@@ -9,7 +9,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
-import at.crowdware.nocodelib.Padding
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -42,8 +41,6 @@ fun hexToColor(hex: String): Color {
         else -> Color.Black
     }
 }
-
-
 
 fun parsePadding(padding: String): Padding {
     val paddingValues = padding.split(" ").mapNotNull { it.toIntOrNull() }

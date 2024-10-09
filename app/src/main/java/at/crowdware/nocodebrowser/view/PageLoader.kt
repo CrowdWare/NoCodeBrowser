@@ -1,6 +1,7 @@
 package at.crowdware.nocodebrowser.view
 
 import android.annotation.SuppressLint
+import android.provider.ContactsContract.CommonDataKinds.Im
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,36 +28,36 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import at.crowdware.nocodebrowser.MainActivity
-import at.crowdware.nocodebrowser.ui.getRootElement
-import at.crowdware.nocodebrowser.ui.hexToColor
-import at.crowdware.nocodebrowser.ui.parseMarkdown
-import at.crowdware.nocodebrowser.ui.parsePadding
+import at.crowdware.nocodebrowser.ui.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.w3c.dom.Element
-import org.w3c.dom.Node
 
 
+
+// TODO: Load objects (pages) via lib
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun LoadPage(name: String, navhostBackground: MutableState<Color>) {
-    var page by remember { mutableStateOf(getRootElement("<page><column padding='16'><text color='#FFFFFF'>One moment, page loading...</text></column></page>")) }
     val context = LocalContext.current
+    var page by remember { mutableStateOf(Page(color="#FFFFFF", backgroundColor = "#000000", padding = Padding(0,0,0,0), elements = mutableListOf()))}  // by remember { mutableStateOf(parsePage("Page { Column { padding: '16' Text { color: '#FFFFFF' text: 'One moment, page loading...'}}}")) }
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        val xmlContent = withContext(Dispatchers.IO) {
+        val qmlContent = withContext(Dispatchers.IO) {
             if (context is MainActivity) {
-                context.downloadXml("https://nocode.crowdware.at/pages/$name.xml")
+                val url = "https://nocode.crowdware.at/pages/$name.qml"
+                println(url)
+                context.downloadQml(url)
             } else
                 null
         }
-        if (xmlContent != null) {
-            page = getRootElement(xmlContent)
+        if (qmlContent != null) {
+            println(qmlContent)
+            page = parsePage(qmlContent)
         } else {
-            page =
-                getRootElement("<page><column padding='16'><text color='#FF0000'>An error occurred loading the home page.</text></column></page>")
+            println("load failed...")
+            page = parsePage("Page { Column { padding: '16' Text { color: '#FF0000' text:'An error occurred loading the home page.'}}}")
         }
         isLoading = false
     }
@@ -66,8 +67,8 @@ fun LoadPage(name: String, navhostBackground: MutableState<Color>) {
         }
     } else {
         if (page != null) {
-            val padding = parsePadding(page!!.getAttribute("padding"))
-            val bgColor = page!!.getAttribute("backgroundColor")
+            val padding = page.padding
+            val bgColor = page.backgroundColor
             navhostBackground.value = hexToColor(bgColor)
             Row(
                 modifier = Modifier
@@ -80,91 +81,78 @@ fun LoadPage(name: String, navhostBackground: MutableState<Color>) {
                     .fillMaxSize()
                     .background(color = hexToColor(bgColor))
             ) {
-                RenderElement(page!!)
+                RenderPage(page!!)
             }
         }
     }
 }
 
 @Composable
-fun RenderElement(element: Element) {
-    when(element.tagName) {
-        "page" -> {
-            for (i in 0 until element.childNodes.length) {
-                val childNode: Node = element.childNodes.item(i)
-                if (childNode.nodeType == Node.ELEMENT_NODE) {
-                    val childElement = childNode as Element
-                    RenderElement(childElement)
-                }
-            }
-        }
-        "column" -> {
-            val padding = parsePadding(element.getAttribute("padding"))
-            Column(modifier = Modifier.padding(
-                top = padding.top.dp,
-                bottom = padding.bottom.dp,
-                start = padding.left.dp,
-                end = padding.right.dp
-            )) {
-                for (i in 0 until element.childNodes.length) {
-                    val childNode: Node = element.childNodes.item(i)
-                    if (childNode.nodeType == Node.ELEMENT_NODE) {
-                        val childElement = childNode as Element
-                        RenderElement(childElement)
-                    }
-                }
-            }
-        }
-        "row" -> {
-            val padding = parsePadding(element.getAttribute("padding"))
-            Row(modifier = Modifier.padding(
-                top = padding.top.dp,
-                bottom = padding.bottom.dp,
-                start = padding.left.dp,
-                end = padding.right.dp
-            )) {
-                for (i in 0 until element.childNodes.length) {
-                    val childNode: Node = element.childNodes.item(i)
-                    if (childNode.nodeType == Node.ELEMENT_NODE) {
-                        val childElement = childNode as Element
-                        RenderElement(childElement)
-                    }
-                }
-            }
-        }
-        "text" -> {
-            Text(
+fun RenderPage(page: Page) {
+    for (element in page.elements) {
+        RenderElement(element)
+    }
+}
 
-                text = element.textContent.trim(),
-                style = TextStyle(color = hexToColor(element.getAttribute("color")))
+@Composable
+fun RenderElement(element: UIElement) {
+    when (element) {
+        is ColumnElement -> {
+            Column (modifier = Modifier.padding(
+                top = element.padding.top.dp,
+                bottom = element.padding.bottom.dp,
+                start = element.padding.left.dp,
+                end = element.padding.right.dp
+            )) {
+                for (ele in element.uiElements) {
+                    RenderElement(ele)
+                }
+            }
+        }
+        is RowElement -> {
+            Row (modifier = Modifier.padding(
+                top = element.padding.top.dp,
+                bottom = element.padding.bottom.dp,
+                start = element.padding.left.dp,
+                end = element.padding.right.dp
+            )) {
+                for (ele in element.uiElements) {
+                    RenderElement(ele)
+                }
+            }
+        }
+        is TextElement -> {
+            Text(
+                text = element.text.trim(),
+                style = TextStyle(color = hexToColor(element.color))
             )
         }
-        "markdown" -> {
-            val parsedMarkdown = parseMarkdown(element.textContent.trim())
+        is MarkdownElement -> {
+            val parsedMarkdown = parseMarkdown(element.text.trim())
             Text(
                 text = parsedMarkdown,
-                style = TextStyle(color = hexToColor(element.getAttribute("color")))
+                style = TextStyle(color = hexToColor(element.color))
             )
         }
-        "button" -> {
-            Button(modifier = Modifier.fillMaxWidth(), onClick =  { handleButtonClick(element.getAttribute("link")) }) {
-                Text(text = element.getAttribute("label"))
+        is ButtonElement -> {
+            Button(modifier = Modifier.fillMaxWidth(), onClick =  { handleButtonClick(element.link) }) {
+                Text(text = element.label)
             }
         }
-        "image" -> {
-            dynamicImageFromAssets(filename = element.getAttribute("srv"), element.getAttribute("scale"), element.getAttribute("link"))
+        is ImageElement -> {
+            dynamicImageFromAssets(filename = element.src, element.scale, element.link)
         }
-        "sound" -> {
-            dynamicSoundfromAssets(element.getAttribute("src"))
+        is VideoElement -> {
+            dynamicVideofromAssets(element.src, element.height)
         }
-        "spacer" -> {
-            Spacer(modifier = Modifier.height(element.getAttribute("height").toInt().dp))
+        is SoundElement -> {
+            dynamicSoundfromAssets(element.src)
         }
-        "video" -> {
-            dynamicVideofromAssets(element.getAttribute("src"), element.getAttribute("height").toInt())
+        is SpacerElement -> {
+            Spacer(modifier = Modifier.height(element.height.dp))
         }
-        "youtube" -> {
-            dynamicYoutube(element.getAttribute("height").toInt())
+        is YoutubeElement -> {
+            dynamicYoutube(element.height)
         }
     }
 }
