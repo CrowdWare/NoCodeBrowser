@@ -1,5 +1,7 @@
 package at.crowdware.nocodebrowser
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
@@ -37,6 +39,8 @@ import com.github.h0tk3y.betterParse.lexer.literalToken
 import com.github.h0tk3y.betterParse.lexer.regexToken
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.github.h0tk3y.betterParse.utils.Tuple7
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 sealed class PropertyValue {
@@ -271,6 +275,7 @@ fun parseNestedNavElements(nestedElements: List<Any>, navigation: NavigationElem
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun parseNestedDeployElements(nestedElements: List<Any>, deployment: DeploymentElement) {
     nestedElements.forEach { element ->
         when (element) {
@@ -281,8 +286,10 @@ fun parseNestedDeployElements(nestedElements: List<Any>, deployment: DeploymentE
                 when (elementName) {
                     "File" -> {
                         val path = (properties["path"] as? PropertyValue.StringValue)?.value ?: ""
-                        val time = (properties["time"] as? PropertyValue.StringValue)?.value ?: ""
-                        deployment.files.add(FileElement(path, time))
+                        val date = (properties["time"] as? PropertyValue.StringValue)?.value ?: ""
+                        val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH.mm.ss")
+                        val dateTime = LocalDateTime.parse(date, formatter)
+                        deployment.files.add(FileElement(path, dateTime))
                     }
                 }
             }

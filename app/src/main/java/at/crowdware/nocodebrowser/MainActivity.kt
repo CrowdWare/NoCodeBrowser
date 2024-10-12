@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import at.crowdware.nocodebrowser.ui.App
 import at.crowdware.nocodebrowser.ui.theme.NoCodeBrowserTheme
 import at.crowdware.nocodebrowser.ui.widgets.NavigationItem
 import at.crowdware.nocodebrowser.ui.widgets.NavigationView
@@ -31,36 +32,34 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 class MainActivity : ComponentActivity() {
     val contentLoader = ContentLoader()
-    var pageId: String by mutableStateOf("home")
+    private var app: App? by mutableStateOf(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val context = this
 
         contentLoader.init(this)
-
         lifecycleScope.launch(Dispatchers.Main) {
-            val app = contentLoader.loadApp("https://nocode.crowdware.at/sml/app.sml")
+            // load the dynamic app, we change the content on the web server
+            app = contentLoader.loadApp("https://nocode.crowdware.at/sml/app.sml")
             if (app != null) {
-                println("App: ${app}")
-            } else {
-                println("Unable to open app")
-            }
-        }
-        enableEdgeToEdge()
-        setContent {
-            NoCodeBrowserTheme {
+                enableEdgeToEdge()
+                setContent {
+                    NoCodeBrowserTheme {
 
-                Scaffold(modifier = Modifier.fillMaxSize()) {  _ ->
-                    val list = mutableListOf(
-                        NavigationItem("home", Icons.Default.Home, stringResource(R.string.navigation_home)),
-                        NavigationItem("about", Icons.Default.Home, stringResource(R.string.navigation_about)),
-                        NavigationItem("settings", Icons.Default.Settings, stringResource(R.string.settings)),
-                        NavigationItem("divider")
-                    )
+                        Scaffold(modifier = Modifier.fillMaxSize()) {  _ ->
+                            val list = mutableListOf(
+                                NavigationItem("home", Icons.Default.Home, stringResource(R.string.navigation_home)),
+                                NavigationItem("about", Icons.Default.Home, stringResource(R.string.navigation_about)),
+                                NavigationItem("settings", Icons.Default.Settings, stringResource(R.string.settings)),
+                                NavigationItem("divider")
+                            )
 
-                    // navigation targets which are not listed in the drawer
-                    list.add(NavigationItem(id="video"))
-                    NavigationView(list, this, pageId)
+                            // navigation targets which are not listed in the drawer
+                            list.add(NavigationItem(id="video"))
+                            NavigationView(list, context)
+                        }
+                    }
                 }
             }
         }
@@ -69,9 +68,6 @@ class MainActivity : ComponentActivity() {
     fun openWebPage( url: String) {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         startActivity(browserIntent)
-    }
-    fun loadPage(pId: String) {
-        pageId = pId
     }
 }
 

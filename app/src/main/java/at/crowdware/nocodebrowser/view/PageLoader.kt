@@ -1,6 +1,8 @@
 package at.crowdware.nocodebrowser.view
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,36 +25,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import at.crowdware.nocodebrowser.MainActivity
-import at.crowdware.nocodebrowser.parsePage
 import at.crowdware.nocodebrowser.ui.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun LoadPage(name: String, navhostBackground: MutableState<Color>, mainActivity: MainActivity) {
-    val context = LocalContext.current
-    var page by remember { mutableStateOf(Page(color="#FFFFFF", backgroundColor = "#000000", padding = Padding(0,0,0,0), elements = mutableListOf()))}
+fun LoadPage(
+    name: String,
+    navhostBackground: MutableState<Color>,
+    mainActivity: MainActivity,
+    navController: NavHostController
+) {
+    //val context = LocalContext.current
+    var page:Page? by remember { mutableStateOf(Page(color="#FFFFFF", backgroundColor = "#000000", padding = Padding(0,0,0,0), elements = mutableListOf()))}
     var isLoading by remember { mutableStateOf(true) }
 
+
     LaunchedEffect(Unit) {
-        val smlContent = withContext(Dispatchers.IO) {
-            if (context is MainActivity) {
-                val url = "https://nocode.crowdware.at/sml/$name.sml"
-                context.contentLoader.downloadSml(url)
-            } else
-                null
-        }
-        if (smlContent != null) {
-            page = parsePage(smlContent)
-        } else {
-            println("load failed...")
-            page = parsePage("Page { Column { padding: \"16\" Text { color: \"#FF0000\" fontSize: 18 text:\"An error occurred loading the home page.\"}}}")
+        page = withContext(Dispatchers.IO) {
+            mainActivity.contentLoader.loadPage(name)
         }
         isLoading = false
     }
@@ -62,8 +60,8 @@ fun LoadPage(name: String, navhostBackground: MutableState<Color>, mainActivity:
         }
     } else {
         if (page != null) {
-            val padding = page.padding
-            val bgColor = page.backgroundColor
+            val padding = page!!.padding
+            val bgColor = page!!.backgroundColor
             navhostBackground.value = hexToColor(bgColor)
             Row(
                 modifier = Modifier
@@ -76,24 +74,28 @@ fun LoadPage(name: String, navhostBackground: MutableState<Color>, mainActivity:
                     .fillMaxSize()
                     .background(color = hexToColor(bgColor))
             ) {
-                RenderPage(page!!, navhostBackground, mainActivity)
+                RenderPage(page!!, mainActivity, navController)
             }
         }
     }
 }
 
 @Composable
-fun RenderPage(page: Page, navhostBackground: MutableState<Color>, mainActivity: MainActivity) {
+fun RenderPage(
+    page: Page,
+    mainActivity: MainActivity,
+    navController: NavHostController
+) {
     for (element in page.elements) {
-        RenderElement(element, navhostBackground, mainActivity)
+        RenderElement(element, mainActivity, navController)
     }
 }
 
 @Composable
 fun RenderElement(
     element: UIElement,
-    navhostBackground: MutableState<Color>,
-    mainActivity: MainActivity
+    mainActivity: MainActivity,
+    navController: NavHostController
 ) {
     when (element) {
         is UIElement.Zero -> {}
@@ -105,7 +107,7 @@ fun RenderElement(
                 end = element.padding.right.dp
             )) {
                 for (ele in element.uiElements) {
-                    RenderElement(ele, navhostBackground, mainActivity)
+                    RenderElement(ele, mainActivity, navController)
                 }
             }
         }
@@ -117,7 +119,7 @@ fun RenderElement(
                 end = element.padding.right.dp
             )) {
                 for (ele in element.uiElements) {
-                    RenderElement(ele, navhostBackground, mainActivity)
+                    RenderElement(ele, mainActivity, navController)
                 }
             }
         }
@@ -136,7 +138,7 @@ fun RenderElement(
             )
         }
         is UIElement.ButtonElement -> {
-            Button(modifier = Modifier.fillMaxWidth(), onClick =  { handleButtonClick(element.link, navhostBackground, mainActivity) }) {
+            Button(modifier = Modifier.fillMaxWidth(), onClick =  { handleButtonClick(element.link, mainActivity, navController) }) {
                 Text(text = element.label)
             }
         }
@@ -160,13 +162,14 @@ fun RenderElement(
 
 fun handleButtonClick(
     link: String,
-    navhostBackground: MutableState<Color>,
-    mainActivity: MainActivity
+    mainActivity: MainActivity,
+    navController: NavHostController
 ) {
     when {
         link.startsWith("page:") -> {
             val pageId = link.removePrefix("page:")
-            mainActivity.loadPage(pageId)
+            println("page clicked: $pageId")
+            navController.navigate(pageId)
         }
         link.startsWith("web:") -> {
             val url = link.removePrefix("web:")

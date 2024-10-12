@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
+import java.time.LocalDateTime
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
@@ -43,7 +44,7 @@ data class DeploymentElement(
     val files: MutableList<FileElement> = mutableListOf()
 )
 
-data class FileElement(val path: String, val time: String)
+data class FileElement(val path: String, val time: LocalDateTime)
 
 data class ItemElement (val page: String)
 
