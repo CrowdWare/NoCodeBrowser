@@ -4,19 +4,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import at.crowdware.nocodebrowser.ui.App
-import at.crowdware.nocodebrowser.ui.ButtonElement
-import at.crowdware.nocodebrowser.ui.ColumnElement
-import at.crowdware.nocodebrowser.ui.ImageElement
-import at.crowdware.nocodebrowser.ui.MarkdownElement
+import at.crowdware.nocodebrowser.ui.DeploymentElement
+import at.crowdware.nocodebrowser.ui.FileElement
+import at.crowdware.nocodebrowser.ui.ItemElement
+import at.crowdware.nocodebrowser.ui.NavigationElement
+import at.crowdware.nocodebrowser.ui.UIElement.ButtonElement
+import at.crowdware.nocodebrowser.ui.UIElement.ColumnElement
+import at.crowdware.nocodebrowser.ui.UIElement.ImageElement
+import at.crowdware.nocodebrowser.ui.UIElement.MarkdownElement
 import at.crowdware.nocodebrowser.ui.Padding
 import at.crowdware.nocodebrowser.ui.Page
-import at.crowdware.nocodebrowser.ui.RowElement
-import at.crowdware.nocodebrowser.ui.SoundElement
-import at.crowdware.nocodebrowser.ui.SpacerElement
-import at.crowdware.nocodebrowser.ui.TextElement
+import at.crowdware.nocodebrowser.ui.UIElement.RowElement
+import at.crowdware.nocodebrowser.ui.UIElement.SoundElement
+import at.crowdware.nocodebrowser.ui.UIElement.SpacerElement
+import at.crowdware.nocodebrowser.ui.UIElement.TextElement
 import at.crowdware.nocodebrowser.ui.UIElement
-import at.crowdware.nocodebrowser.ui.VideoElement
-import at.crowdware.nocodebrowser.ui.YoutubeElement
+import at.crowdware.nocodebrowser.ui.UIElement.VideoElement
+import at.crowdware.nocodebrowser.ui.UIElement.YoutubeElement
 import at.crowdware.nocodebrowser.ui.hexToColor
 import at.crowdware.nocodebrowser.ui.parsePadding
 import com.github.h0tk3y.betterParse.combinators.and
@@ -53,19 +57,14 @@ val floatLiteral = regexToken("\\d+\\.\\d+")
 val lineComment: Token = regexToken("//.*")
 val blockComment: Token = regexToken(Regex("/\\*[\\s\\S]*?\\*/", RegexOption.DOT_MATCHES_ALL))
 
-object QmlGrammar : Grammar<List<Any>>() {
-    val whitespaceParser = zeroOrMore(whitespace)
-
+object SmlGrammar : Grammar<List<Any>>() {
+    //val whitespaceParser = zeroOrMore(whitespace)
     val commentParser = lineComment or blockComment
-
     val ignoredParser = zeroOrMore(whitespace or commentParser)
-
     val stringParser = stringLiteral.map { PropertyValue.StringValue(it.text.removeSurrounding("\"")) }
     val integerParser = integerLiteral.map { PropertyValue.IntValue(it.text.toInt()) }
     val floatParser = floatLiteral.map { PropertyValue.FloatValue(it.text.toFloat()) }
-
     val propertyValue = floatParser or integerParser or stringParser
-
     val property by (ignoredParser and identifier and ignoredParser and colon and ignoredParser and propertyValue).map { (_, id, _, _, _, value) ->
         id.text to value
     }
@@ -79,14 +78,27 @@ object QmlGrammar : Grammar<List<Any>>() {
     override val rootParser: Parser<List<Any>> = (oneOrMore(element) and ignoredParser).map { (elements, _) -> elements }
 }
 
-fun isQmlRootElement(qmlString: String, root: String): Boolean {
-    val regex = Regex("""^\s*$root\s*\{""")
-    return regex.containsMatchIn(qmlString)
-}
-
 fun deserializeApp(parsedResult: List<Any>): App {
-    val app = App(type = "", items = mutableListOf())
-    // TODO: Implement deserialization logic
+    val app = App()
+
+    parsedResult.forEach { tuple ->
+        when (tuple) {
+            is Tuple7<*, *, *, *, *, *, *> -> {
+                val elementName = (tuple.t2 as? TokenMatch)?.text
+                val properties = extractProperties(tuple)
+
+                when (elementName) {
+                    "App" -> {
+                        app.id = (properties["id"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.icon = (properties["icon"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.name = (properties["name"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.smlVersion = (properties["smlVersion"] as? PropertyValue.StringValue)?.value ?: ""
+                        parseNestedAppElements(extractChildElements(tuple), app)
+                    }
+                }
+            }
+        }
+    }
     return app
 }
 
@@ -219,12 +231,71 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
     }
 }
 
-fun parsePage(qml: String): Page {
-    val result = QmlGrammar.parseToEnd(qml)
+fun parseNestedAppElements(nestedElements: List<Any>, app: App) {
+    nestedElements.forEach { element ->
+        when (element) {
+            is Tuple7<*, *, *, *, *, *, *> -> {
+                val elementName = (element.t2 as? TokenMatch)?.text
+                val properties = extractProperties(element)
+
+                when (elementName) {
+                    "Navigation" -> {
+                        val type = (properties["type"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.navigation.type = type
+                        parseNestedNavElements(extractChildElements(element), app.navigation)
+                    }
+                    "Deployment" -> {
+                        parseNestedDeployElements(extractChildElements(element), app.deployment)
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun parseNestedNavElements(nestedElements: List<Any>, navigation: NavigationElement) {
+    nestedElements.forEach { element ->
+        when (element) {
+            is Tuple7<*, *, *, *, *, *, *> -> {
+                val elementName = (element.t2 as? TokenMatch)?.text
+                val properties = extractProperties(element)
+
+                when (elementName) {
+                    "Item" -> {
+                        val page = (properties["page"] as? PropertyValue.StringValue)?.value ?: ""
+                        navigation.items.add(ItemElement(page))
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun parseNestedDeployElements(nestedElements: List<Any>, deployment: DeploymentElement) {
+    nestedElements.forEach { element ->
+        when (element) {
+            is Tuple7<*, *, *, *, *, *, *> -> {
+                val elementName = (element.t2 as? TokenMatch)?.text
+                val properties = extractProperties(element)
+
+                when (elementName) {
+                    "File" -> {
+                        val path = (properties["path"] as? PropertyValue.StringValue)?.value ?: ""
+                        val time = (properties["time"] as? PropertyValue.StringValue)?.value ?: ""
+                        deployment.files.add(FileElement(path, time))
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun parsePage(sml: String): Page {
+    val result = SmlGrammar.parseToEnd(sml)
     return deserializePage(result)
 }
 
-fun parseApp(qml: String): App {
-    val result = QmlGrammar.parseToEnd(qml)
+fun parseApp(sml: String): App {
+    val result = SmlGrammar.parseToEnd(sml)
     return deserializeApp(result)
 }

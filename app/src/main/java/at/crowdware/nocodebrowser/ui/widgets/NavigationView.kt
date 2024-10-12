@@ -63,7 +63,7 @@ import java.io.IOException
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivity) {
+fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivity, pageId: String) {
     val navController = rememberNavController()
     val selectedItem = remember { mutableStateOf("home") }
     var navhostBackground = remember { mutableStateOf(Color.White) }
@@ -74,7 +74,7 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
     val context = LocalContext.current
     val pluginName = remember { mutableStateOf("App") }
 
-    NavHost(navController = navController, startDestination = "home", modifier = Modifier.background(color = navhostBackground.value)) {
+    NavHost(navController = navController, startDestination = pageId, modifier = Modifier.background(color = navhostBackground.value)) {
         for (index in items.indices) {
             composable(items[index].id) {
                 when (items[index].id) {
@@ -102,8 +102,8 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
                     NavigationDrawer(items, selectedItem, title.value, navTarget.value) {
                         when (items[index].id) {
                             // have a look at MainActivity for navigation
-                            "home" -> LoadPage("home", navhostBackground)
-                            "about" -> LoadPage("about", navhostBackground)
+                            "home" -> LoadPage("pages/home", navhostBackground, mainActivity)
+                            "about" -> LoadPage("pages/about", navhostBackground, mainActivity)
                             //"settings" -> Settings()
 
                             else -> {

@@ -1,7 +1,6 @@
 package at.crowdware.nocodebrowser.view
 
 import android.annotation.SuppressLint
-import android.provider.ContactsContract.CommonDataKinds.Im
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,28 +33,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 
-
-// TODO: Load objects (pages) via lib
-
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun LoadPage(name: String, navhostBackground: MutableState<Color>) {
+fun LoadPage(name: String, navhostBackground: MutableState<Color>, mainActivity: MainActivity) {
     val context = LocalContext.current
-    var page by remember { mutableStateOf(Page(color="#FFFFFF", backgroundColor = "#000000", padding = Padding(0,0,0,0), elements = mutableListOf()))}  // by remember { mutableStateOf(parsePage("Page { Column { padding: '16' Text { color: '#FFFFFF' text: 'One moment, page loading...'}}}")) }
+    var page by remember { mutableStateOf(Page(color="#FFFFFF", backgroundColor = "#000000", padding = Padding(0,0,0,0), elements = mutableListOf()))}
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        val qmlContent = withContext(Dispatchers.IO) {
+        val smlContent = withContext(Dispatchers.IO) {
             if (context is MainActivity) {
-                val url = "https://nocode.crowdware.at/pages/$name.qml"
-                println(url)
-                context.downloadQml(url)
+                val url = "https://nocode.crowdware.at/sml/$name.sml"
+                context.contentLoader.downloadSml(url)
             } else
                 null
         }
-        if (qmlContent != null) {
-            println(qmlContent)
-            page = parsePage(qmlContent)
+        if (smlContent != null) {
+            page = parsePage(smlContent)
         } else {
             println("load failed...")
             page = parsePage("Page { Column { padding: \"16\" Text { color: \"#FF0000\" fontSize: 18 text:\"An error occurred loading the home page.\"}}}")
@@ -82,23 +76,28 @@ fun LoadPage(name: String, navhostBackground: MutableState<Color>) {
                     .fillMaxSize()
                     .background(color = hexToColor(bgColor))
             ) {
-                RenderPage(page!!)
+                RenderPage(page!!, navhostBackground, mainActivity)
             }
         }
     }
 }
 
 @Composable
-fun RenderPage(page: Page) {
+fun RenderPage(page: Page, navhostBackground: MutableState<Color>, mainActivity: MainActivity) {
     for (element in page.elements) {
-        RenderElement(element)
+        RenderElement(element, navhostBackground, mainActivity)
     }
 }
 
 @Composable
-fun RenderElement(element: UIElement) {
+fun RenderElement(
+    element: UIElement,
+    navhostBackground: MutableState<Color>,
+    mainActivity: MainActivity
+) {
     when (element) {
-        is ColumnElement -> {
+        is UIElement.Zero -> {}
+        is UIElement.ColumnElement -> {
             Column (modifier = Modifier.padding(
                 top = element.padding.top.dp,
                 bottom = element.padding.bottom.dp,
@@ -106,11 +105,11 @@ fun RenderElement(element: UIElement) {
                 end = element.padding.right.dp
             )) {
                 for (ele in element.uiElements) {
-                    RenderElement(ele)
+                    RenderElement(ele, navhostBackground, mainActivity)
                 }
             }
         }
-        is RowElement -> {
+        is UIElement.RowElement -> {
             Row (modifier = Modifier.padding(
                 top = element.padding.top.dp,
                 bottom = element.padding.bottom.dp,
@@ -118,62 +117,67 @@ fun RenderElement(element: UIElement) {
                 end = element.padding.right.dp
             )) {
                 for (ele in element.uiElements) {
-                    RenderElement(ele)
+                    RenderElement(ele, navhostBackground, mainActivity)
                 }
             }
         }
-        is TextElement -> {
+        is UIElement.TextElement -> {
             Text(
                 text = element.text.trim(),
                 fontSize = element.fontSize,
                 style = TextStyle(color = element.color)
             )
         }
-        is MarkdownElement -> {
+        is UIElement.MarkdownElement -> {
             val parsedMarkdown = parseMarkdown(element.text.trim())
             Text(
                 text = parsedMarkdown,
                 style = TextStyle(color = hexToColor(element.color))
             )
         }
-        is ButtonElement -> {
-            Button(modifier = Modifier.fillMaxWidth(), onClick =  { handleButtonClick(element.link) }) {
+        is UIElement.ButtonElement -> {
+            Button(modifier = Modifier.fillMaxWidth(), onClick =  { handleButtonClick(element.link, navhostBackground, mainActivity) }) {
                 Text(text = element.label)
             }
         }
-        is ImageElement -> {
+        is UIElement.ImageElement -> {
             dynamicImageFromAssets(filename = element.src, element.scale, element.link)
         }
-        is VideoElement -> {
+        is UIElement.VideoElement -> {
             dynamicVideofromAssets(element.src, element.height)
         }
-        is SoundElement -> {
+        is UIElement.SoundElement -> {
             dynamicSoundfromAssets(element.src)
         }
-        is SpacerElement -> {
+        is UIElement.SpacerElement -> {
             Spacer(modifier = Modifier.height(element.height.dp))
         }
-        is YoutubeElement -> {
+        is UIElement.YoutubeElement -> {
             dynamicYoutube(element.height)
         }
     }
 }
 
-fun handleButtonClick(link: String) {
+fun handleButtonClick(
+    link: String,
+    navhostBackground: MutableState<Color>,
+    mainActivity: MainActivity
+) {
     when {
         link.startsWith("page:") -> {
             val pageId = link.removePrefix("page:")
-            //loadPage(pageId)
+            mainActivity.loadPage(pageId)
         }
         link.startsWith("web:") -> {
             val url = link.removePrefix("web:")
-            //openWebPage(url)
+            mainActivity.openWebPage(url)
         }
         else -> {
             println("Unknown link type: $link")
         }
     }
 }
+
 
 @Composable
 fun dynamicImageFromAssets(filename: String, scale: String, link: String) {
