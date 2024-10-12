@@ -39,6 +39,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun LoadPage(
     name: String,
+    url: String,
     navhostBackground: MutableState<Color>,
     mainActivity: MainActivity,
     navController: NavHostController
@@ -50,7 +51,7 @@ fun LoadPage(
 
     LaunchedEffect(Unit) {
         page = withContext(Dispatchers.IO) {
-            mainActivity.contentLoader.loadPage(name)
+            mainActivity.contentLoader.loadPage(name, url)
         }
         isLoading = false
     }
@@ -168,7 +169,6 @@ fun handleButtonClick(
     when {
         link.startsWith("page:") -> {
             val pageId = link.removePrefix("page:")
-            println("page clicked: $pageId")
             navController.navigate(pageId)
         }
         link.startsWith("web:") -> {

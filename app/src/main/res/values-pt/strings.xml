@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="icon">Ícone do Shift</string>
+    <string name="language_english">Inglês</string>
+    <string name="language_german">Alemão</string>
+    <string name="language_spanish">Espanhol</string>
+    <string name="language_french">Francês</string>
+    <string name="language_portugues">Português</string>
+    <string name="language_esperanto">Esperanto</string>
+    <string name="select_preferred_language">Selecione o idioma preferido</string>
+    <string name="navigation_home">Início</string>
+    <string name="navigation_about">Sobre</string>
+    <string name="about_shift">Sobre o SHIFT</string>
+    <string name="settings">Configurações</string>
+    <string name="about_dialog_text">SHIFT NOS CONECTA A TODOS\nSHIFT é descentralizado e, portanto, não funciona em um servidor.\nSua conta no SHIFT é anônima, apenas seus amigos reais sabem quem está por trás da sua conta.\nNão é necessário se registrar.\nSem servidor significa também sem censura e sem anúncios.\nO SHIFT também cria micro moedas líquidas e pode ser usado para demonstrar gratidão a outros membros.</string>
+    <string name="personal_data">Dados pessoais</string>
+
+</resources>

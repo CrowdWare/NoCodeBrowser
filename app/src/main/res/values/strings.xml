@@ -7,6 +7,12 @@
     <string name="about_shift">NoCodeBrowser</string>
     <string name="about_dialog_text">NoCodeBrowser ist eine einfache Möglichkeit dynamisch Apps über das Internet zu laden, zu testen und auszuführen.\nDas bedeutet die komplette App wird auf einem Webserver installiert und der Inhalt wir automatisch von die App runtergeladen.</string>
     <string name="personal_data">Personal Data</string>
-
+    <string name="select_preferred_language">Select preferred language</string>
+    <string name="language_english">English</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_portugues">Português</string>
+    <string name="language_esperanto">Esperanto</string>
 </resources>
 

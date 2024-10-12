@@ -21,6 +21,8 @@ package at.crowdware.nocodebrowser.ui.widgets
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
@@ -55,12 +57,14 @@ import at.crowdware.nocodebrowser.R
 import at.crowdware.nocodebrowser.ui.theme.OnPrimary
 import at.crowdware.nocodebrowser.ui.theme.Primary
 import at.crowdware.nocodebrowser.view.LoadPage
+import at.crowdware.nocodebrowser.ui.pages.Settings
 import kotlinx.coroutines.launch
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivity) {
@@ -103,14 +107,15 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
                     NavigationDrawer(items, selectedItem, title.value, navTarget.value) {
                         when (items[index].id) {
                             // have a look at MainActivity for navigation
-                            "home" -> LoadPage("home", navhostBackground, mainActivity, navController)
+                            "home" -> LoadPage("home", items[index].url, navhostBackground, mainActivity, navController)
                             "about" -> LoadPage(
                                 "about",
+                                items[index].url,
                                 navhostBackground,
                                 mainActivity,
                                 navController
                             )
-                            //"settings" -> Settings()
+                            "settings" -> Settings()
 
                             else -> {
 

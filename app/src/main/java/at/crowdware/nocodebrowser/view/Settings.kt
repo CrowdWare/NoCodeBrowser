@@ -17,7 +17,7 @@
  *  along with NoCodeBrowser.  If not, see <http://www.gnu.org/licenses/>.
  *
  ****************************************************************************/
-package at.crowdware.shift.ui.pages
+package at.crowdware.nocodebrowser.ui.pages
 
 import android.app.Activity
 import androidx.compose.foundation.layout.Column
@@ -39,6 +39,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import at.crowdware.nocodebrowser.R
+import at.crowdware.nocodebrowser.logic.LocaleManager
+import at.crowdware.nocodebrowser.ui.widgets.DropDownListbox
+import at.crowdware.shift.ui.widgets.rememberDropDownListboxStateHolder
 
 
 @Composable
@@ -50,14 +53,14 @@ fun Settings() {
     val scrollState = rememberScrollState()
 
     //region vars for the DropDownlistbox
-    //val languages = LocaleManager.getLanguages()
-    //val index = LocaleManager.getLanguageIndex()
+    val languages = LocaleManager.getLanguages()
+    val index = LocaleManager.getLanguageIndex()
     val currentActivity = LocalContext.current as? Activity
-    //val onSelectedIndexChanged: (Int) -> Unit = { idx ->
-    //    LocaleManager.setLocale(context, idx)
-    //    currentActivity?.recreate()
-    //}
-    //val stateHolderLanguage = rememberDropDownListboxStateHolder(languages, index, onSelectedIndexChanged)
+    val onSelectedIndexChanged: (Int) -> Unit = { idx ->
+        LocaleManager.setLocale(context, idx)
+        currentActivity?.recreate()
+    }
+    val stateHolderLanguage = rememberDropDownListboxStateHolder(languages, index, onSelectedIndexChanged)
     //endregion
 
     Column(
@@ -73,18 +76,14 @@ fun Settings() {
             style = TextStyle(fontSize = 18.sp),
             modifier = Modifier.align(Alignment.Start)
         )
-        /*
-        Text(
-            stringResource(R.string.personal_data), fontWeight = FontWeight.Bold,
-            style = TextStyle(fontSize = 18.sp),
-            modifier = Modifier.align(Alignment.Start)
-        )
         Spacer(modifier = Modifier.height(8.dp))
         DropDownListbox(
             label = stringResource(R.string.select_preferred_language),
             stateHolder = stateHolderLanguage,
             modifier = Modifier.padding(16.dp)
         )
+        
+        /*
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(value = name.value,
             label = {Text(stringResource(R.string.name_or_nickname),)},
@@ -93,9 +92,9 @@ fun Settings() {
                 nameChanged.value = true
                 saveButtonEnabled = true
         })
-*/
+
         Spacer(modifier = Modifier.height(32.dp))
-        /*
+
         Button(colors = ButtonDefaults.buttonColors(
             containerColor = Primary,
             contentColor = OnPrimary

@@ -19,7 +19,7 @@ class ContentLoader {
     private lateinit var okHttpClient: OkHttpClient
     private lateinit var context: Context
     lateinit var app: App
-    private lateinit var appUrl: String
+    lateinit var appUrl: String
     private var appLoaded = false
 
     // Initialize the OkHttp client and setup cache directory
@@ -34,7 +34,8 @@ class ContentLoader {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun loadPage(name: String): Page? {
+    suspend fun loadPage(name: String, url: String): Page? {
+        appUrl = url
         var fileContent = ""
         val url = "$appUrl/pages/$name.sml"
         val result = app.deployment.files.find { it.path == "$name.sml" }
@@ -123,7 +124,6 @@ class ContentLoader {
         if (appContent != null && appContent.isNotEmpty()) {
             app = parseApp(appContent)
             appLoaded = true
-            println("app loaded")
         }
         return@withContext app
     }

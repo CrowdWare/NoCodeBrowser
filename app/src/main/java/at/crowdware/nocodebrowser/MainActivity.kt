@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -21,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import at.crowdware.nocodebrowser.logic.LocaleManager
 import at.crowdware.nocodebrowser.ui.App
 import at.crowdware.nocodebrowser.ui.theme.NoCodeBrowserTheme
 import at.crowdware.nocodebrowser.ui.widgets.NavigationItem
@@ -33,30 +36,43 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     val contentLoader = ContentLoader()
     private var app: App? by mutableStateOf(null)
+    private var loading by mutableStateOf(false)
+    private val url = "https://nocode.crowdware.at/sml/app.sml"
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val context = this
 
         contentLoader.init(this)
         lifecycleScope.launch(Dispatchers.Main) {
-            // load the dynamic app, we change the content on the web server
-            app = contentLoader.loadApp("https://nocode.crowdware.at/sml/app.sml")
+            // load the dynamic app, we can change the content on the web server
+            if (!loading) {
+                loading = true
+                app = contentLoader.loadApp(url)
+            }
             if (app != null) {
                 enableEdgeToEdge()
                 setContent {
                     NoCodeBrowserTheme {
+                        LocaleManager.init(applicationContext, resources)
 
                         Scaffold(modifier = Modifier.fillMaxSize()) {  _ ->
                             val list = mutableListOf(
-                                NavigationItem("home", Icons.Default.Home, stringResource(R.string.navigation_home)),
-                                NavigationItem("about", Icons.Default.Home, stringResource(R.string.navigation_about)),
-                                NavigationItem("settings", Icons.Default.Settings, stringResource(R.string.settings)),
-                                NavigationItem("divider")
+                                NavigationItem("home", contentLoader.appUrl, Icons.Default.Home, stringResource(R.string.navigation_home)),
+                                NavigationItem("about", contentLoader.appUrl, Icons.Default.Home, stringResource(R.string.navigation_about)),
+                                NavigationItem("settings", "", Icons.Default.Settings, stringResource(R.string.settings)),
+                                //NavigationItem("divider")
                             )
 
                             // navigation targets which are not listed in the drawer
-                            list.add(NavigationItem(id="video"))
+                            for (file in app!!.deployment.files) {
+                                if (file.path.endsWith(".sml")) {
+                                    list.add(NavigationItem(file.path.substringBefore(".sml"), contentLoader.appUrl))
+                                }
+                            }
+
+                            //list.add(NavigationItem(id="video"))
                             NavigationView(list, context)
                         }
                     }
@@ -68,6 +84,10 @@ class MainActivity : ComponentActivity() {
     fun openWebPage( url: String) {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         startActivity(browserIntent)
+    }
+
+    override fun attachBaseContext(newBase: Context?) {
+        super.attachBaseContext(LocaleManager.wrapContext(newBase!!))
     }
 }
 
