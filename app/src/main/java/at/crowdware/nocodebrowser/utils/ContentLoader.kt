@@ -55,6 +55,16 @@ class ContentLoader {
         file.appendText("$title|$url\n")
     }
 
+    fun removeLink(title: String, url: String) {
+        links.removeIf { it.titel == title && it.url == url }
+        val file = File(context.filesDir, "links.txt")
+        file.delete()
+        file.createNewFile()
+        for(link in links) {
+            file.writeText("${link.titel}|${link.url}\n")
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun loadAsset(name: String): String {
         var fileContent: ByteArray? = null
@@ -92,8 +102,6 @@ class ContentLoader {
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun loadPage(name: String): Page? {
-        println("loadPage: $name $appUrl")
-
         var fileContent = ""
         val url = "$appUrl/pages/$name.sml"
         println(url)
@@ -166,7 +174,6 @@ class ContentLoader {
         if (file.exists()) {
             fileContent = file.readText()
         }
-println("load app: $url")
         // Download content from the URL
         var appContent = downloadSml(url)
 
@@ -191,6 +198,7 @@ println("load app: $url")
 
     // Suspend function to download content asynchronously
     suspend fun downloadSml(url: String): String? = withContext(Dispatchers.IO) {
+        println("downloadSml: $url")
         val request = Request.Builder().url(url).build()
         return@withContext try {
             // Use OkHttp's enqueue for asynchronous call

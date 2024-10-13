@@ -94,6 +94,7 @@ fun LoadPage(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RenderPage(
     page: Page,

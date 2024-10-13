@@ -18,6 +18,7 @@
     <string name="add_link">Add Link</string>
     <string name="title">Title</string>
     <string name="url">Url</string>
+    <string name="add_new_link">Add new link</string>
 
 
 </resources>
