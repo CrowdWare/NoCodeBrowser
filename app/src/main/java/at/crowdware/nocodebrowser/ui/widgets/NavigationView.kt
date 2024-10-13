@@ -69,7 +69,7 @@ import java.io.IOException
 @Composable
 fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivity) {
     val navController = rememberNavController()
-    val selectedItem = remember { mutableStateOf("home") }
+    val selectedItem = remember { mutableStateOf("app.home") }
     var navhostBackground = remember { mutableStateOf(Color.White) }
 
     NavigationManager.setNavController(navController)
@@ -78,21 +78,20 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
     val context = LocalContext.current
     val pluginName = remember { mutableStateOf("App") }
 
-
     NavHost(navController = navController, startDestination = "home", modifier = Modifier.background(color = navhostBackground.value)) {
         for (index in items.indices) {
             composable(items[index].id) {
                 when (items[index].id) {
-                    "home" -> {
+                    "app.home" -> {
                         title.value = "NoCodeBrowser"
                         navTarget.value = ""
                     }
-                    "about" -> {
+                    "app.about" -> {
                         title.value = "About"
                         navTarget.value = ""
                     }
 
-                    "settings" -> {
+                    "app.settings" -> {
                         title.value = stringResource(R.string.settings)
                         navTarget.value = ""
                     }
@@ -104,21 +103,17 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
                 }
                 runCatching {
                     pluginName.value = "App"
-                    NavigationDrawer(items, selectedItem, title.value, navTarget.value) {
+                    NavigationDrawer(items, selectedItem, title.value, navTarget.value, mainActivity) {
                         when (items[index].id) {
                             // have a look at MainActivity for navigation
-                            "home" -> LoadPage("home", items[index].url, navhostBackground, mainActivity, navController)
-                            "about" -> LoadPage(
-                                "about",
-                                items[index].url,
-                                navhostBackground,
-                                mainActivity,
-                                navController
+                            "app.home" -> LoadPage("home", navhostBackground, mainActivity, navController)
+                            "app.about" -> LoadPage("about", navhostBackground, mainActivity, navController
                             )
-                            "settings" -> Settings()
+                            "app.settings" -> Settings()
 
                             else -> {
-
+                                //println("about to load page: ${items[index].id} ${items[index].url}")
+                                LoadPage(items[index].id, navhostBackground, mainActivity, navController)
                             }
                         }
                     }
@@ -161,6 +156,7 @@ fun NavigationDrawer(
     selectedItem: MutableState<String>,
     title: String,
     navTarget: String = "",
+    mainActivity: MainActivity,
     content: @Composable () -> Unit
 ) {
     val openDialog = remember { mutableStateOf(false) }
@@ -176,7 +172,7 @@ fun NavigationDrawer(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
-        drawerContent = { DrawerSheet(drawerState, items, selectedItem) },
+        drawerContent = { DrawerSheet(drawerState, items, selectedItem, mainActivity) },
         content = {
             Column() {
                 CenterAlignedTopAppBar(

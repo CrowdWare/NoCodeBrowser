@@ -297,12 +297,22 @@ fun parseNestedDeployElements(nestedElements: List<Any>, deployment: DeploymentE
     }
 }
 
-fun parsePage(sml: String): Page {
-    val result = SmlGrammar.parseToEnd(sml)
-    return deserializePage(result)
+fun parsePage(sml: String): Page? {
+    try {
+        val result = SmlGrammar.parseToEnd(sml)
+        return deserializePage(result)
+    } catch (e: Exception) {
+        println("An error occurred while parsing a page: ${e.message}\nSML: $sml")
+        return null
+    }
 }
 
-fun parseApp(sml: String): App {
-    val result = SmlGrammar.parseToEnd(sml)
-    return deserializeApp(result)
+fun parseApp(sml: String): App? {
+    try {
+        val result = SmlGrammar.parseToEnd(sml)
+        return deserializeApp(result)
+    } catch (e: Exception) {
+        println("An error occurred while parsing an app: ${e.message}\nSML: $sml")
+        return null
+    }
 }

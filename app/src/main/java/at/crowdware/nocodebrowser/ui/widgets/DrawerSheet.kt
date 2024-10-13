@@ -37,6 +37,7 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -45,16 +46,25 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import at.crowdware.nocodebrowser.MainActivity
 import at.crowdware.nocodebrowser.R
 import at.crowdware.nocodebrowser.ui.theme.OnPrimary
 import at.crowdware.nocodebrowser.ui.theme.Primary
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class NavigationItem( val id: String, val url: String = "", val icon: ImageVector? = null, val text: String = "", val index: Int = 0)
 
 
 @Composable
-fun DrawerSheet(drawerState: DrawerState, items: List<NavigationItem>, selectedItem: MutableState<String>) {
+fun DrawerSheet(
+    drawerState: DrawerState,
+    items: List<NavigationItem>,
+    selectedItem: MutableState<String>,
+    mainActivity: MainActivity
+) {
     val scope = rememberCoroutineScope()
 
     if ( drawerState.offset.value > -540f) {
@@ -95,9 +105,16 @@ fun DrawerSheet(drawerState: DrawerState, items: List<NavigationItem>, selectedI
                             label = { Text(items[index].text) },
                             selected = items[index].text == selectedItem.value,
                             onClick = {
-                                scope.launch { drawerState.close() }
-                                selectedItem.value = items[index].text
-                                NavigationManager.navigate(items[index].id)
+                                scope.launch {
+                                    drawerState.close()
+
+                                    selectedItem.value = items[index].text
+
+                                    withContext(Dispatchers.IO) {
+                                        mainActivity.contentLoader.switchApp(items[index].url)
+                                    }
+                                    NavigationManager.navigate(items[index].id)
+                                }
                             },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                         )

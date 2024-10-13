@@ -14,5 +14,9 @@
     <string name="settings">Paramètres</string>
     <string name="about_dialog_text">SHIFT NOUS CONNECTE TOUS\nSHIFT est décentralisé et ne fonctionnera donc pas sur un serveur.\nVotre compte SHIFT est anonyme, seuls vos vrais amis savent qui se cache derrière votre compte.\nAucune inscription nécessaire.\nPas de serveur signifie également pas de censure et pas de publicité.\nSHIFT crée également des micro-monnaies liquides et peut être utilisé pour exprimer votre gratitude envers les autres membres.</string>
     <string name="personal_data">Données personnelles</string>
+    <string name="links">Links</string>
+    <string name="add_link">Add Link</string>
+    <string name="title">Title</string>
+    <string name="url">Url</string>
 
 </resources>

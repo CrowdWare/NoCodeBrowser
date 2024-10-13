@@ -1,5 +1,6 @@
 package at.crowdware.nocodebrowser.utils
 import android.content.Context
+import android.os.Binder
 import android.os.Build
 import androidx.annotation.RequiresApi
 import at.crowdware.nocodebrowser.parseApp
@@ -14,13 +15,16 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 
+data class Link(val titel: String, val url: String)
+
 class ContentLoader {
 
     private lateinit var okHttpClient: OkHttpClient
     private lateinit var context: Context
-    lateinit var app: App
+    var app: App? = null
     lateinit var appUrl: String
     private var appLoaded = false
+    val links: MutableList<Link> = mutableListOf()
 
     // Initialize the OkHttp client and setup cache directory
     fun init(ctx: Context) {
@@ -31,18 +35,75 @@ class ContentLoader {
         if (!directory.exists()) {
             directory.mkdir()
         }
+
+        // load link list
+        val file = File(context.filesDir, "links.txt")
+        if(file.exists()) {
+            val list = file.readLines()
+            for (line in list) {
+                val values = line.split("|")
+                links.add(Link(values[0], values[1]))
+            }
+        }
+    }
+
+    fun addLink(title: String, url: String) {
+        val file = File(context.filesDir, "links.txt")
+        if (!file.exists()) {
+            file.createNewFile()
+        }
+        file.appendText("$title|$url\n")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun loadPage(name: String, url: String): Page? {
-        appUrl = url
+    suspend fun loadAsset(name: String): String {
+        var fileContent: ByteArray? = null
+        val url = "$appUrl/assets/$name"
+        if(app == null)
+            return ""
+        val result = app!!.deployment.files.find { it.path == "$name" }
+        if (result == null) {
+            return ""
+        }
+        val fileName = ("ContentCache/" + appUrl.substringAfter("://") + "/assets/$name").replace(".", "_").replace(":", "_")
+        val file = File(context.filesDir, fileName)
+        var ret = true
+        if (file.exists()) {
+            val lastModifiedMillis = file.lastModified()
+            val lastModifiedDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastModifiedMillis), ZoneId.systemDefault())
+            if (result.time.isAfter(lastModifiedDateTime)) {
+                // web server version is newer
+                ret = loadAndCacheAsset(url, fileName, result.time)
+            }
+        } else {
+            ret = loadAndCacheAsset(url, fileName, result.time)
+        }
+        return if (ret)
+            fileName
+        else
+            ""
+    }
+
+    suspend fun switchApp(url: String) {
+        if(url != appUrl) {
+            loadApp(url+ "/app.sml")
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun loadPage(name: String): Page? {
+        println("loadPage: $name $appUrl")
+
         var fileContent = ""
         val url = "$appUrl/pages/$name.sml"
-        val result = app.deployment.files.find { it.path == "$name.sml" }
+        println(url)
+        if (app == null)
+            return null
+        val result = app!!.deployment.files.find { it.path == "$name.sml" }
         if (result == null) {
             return null
         }
-        val fileName = "ContentCache/" + appUrl.substringAfter("://") + "/pages/$name.sml"
+        val fileName = ("ContentCache/" + appUrl.substringAfter("://") + "/pages/$name.sml").replace(".", "_").replace(":", "_")
         val file = File(context.filesDir, fileName)
         fileContent = if (file.exists()) {
             val lastModifiedMillis = file.lastModified()
@@ -92,7 +153,7 @@ class ContentLoader {
 
         appUrl = url.substringBefore("/app.sml")
 
-        val fileName = "ContentCache/" + url.substringAfter("://")
+        val fileName = "ContentCache/" + url.substringAfter("://").replace(".", "_").replace(":", "_")
         val file = File(context.filesDir, fileName)
 
         // Make sure the parent directories exist
@@ -105,7 +166,7 @@ class ContentLoader {
         if (file.exists()) {
             fileContent = file.readText()
         }
-
+println("load app: $url")
         // Download content from the URL
         var appContent = downloadSml(url)
 
@@ -145,6 +206,24 @@ class ContentLoader {
         }
     }
 
+    suspend fun downloadAsset(url: String): ByteArray? = withContext(Dispatchers.IO) {
+        val request = Request.Builder().url(url).build()
+        return@withContext try {
+            val response = okHttpClient.newCall(request).await()
+            if (response.isSuccessful) {
+                // Read the response body as a ByteArray
+                response.body?.byteStream()?.use { inputStream ->
+                    inputStream.readBytes()
+                }
+            } else {
+                null
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
+    }
+
     // Extension function to convert OkHttp Call into a suspending function
     private suspend fun Call.await(): Response = suspendCancellableCoroutine { continuation ->
         enqueue(object : Callback {
@@ -166,5 +245,27 @@ class ContentLoader {
                 // Handle cancellation exception
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun loadAndCacheAsset(url: String, fileName: String, time: LocalDateTime): Boolean {
+        val bytes = withContext(Dispatchers.IO) {
+            downloadAsset(url)
+        }
+        if (bytes != null) {
+            val cache = File(context.filesDir, fileName)
+            // Make sure the parent directories exist
+            val parentDir = cache.parentFile
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs()
+            }
+            cache.writeBytes(bytes)
+            val millis = time
+                .atZone(ZoneId.systemDefault()) // Convert to ZonedDateTime in the system's default time zone
+                .toInstant() // Convert to Instant (which represents a moment in time)
+                .toEpochMilli()
+            cache.setLastModified(millis)
+        }
+        return true
     }
 }

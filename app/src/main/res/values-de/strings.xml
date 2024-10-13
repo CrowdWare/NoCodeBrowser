@@ -12,6 +12,10 @@
     <string name="navigation_home">Startseite</string>
     <string name="navigation_about">Über uns</string>
     <string name="about_shift">Über SHIFT</string>
-     <string name="settings">Einstellungen</string>
+    <string name="settings">Einstellungen</string>
     <string name="about_dialog_text">SHIFT VERBINDET UNS ALLE\nSHIFT ist dezentralisiert und läuft daher nicht auf einem Server.\nDein SHIFT-Konto ist anonym, nur Deine Freunde wissen, wer sich hinter Deinem Konto verbirgt.\nKeine Registrierung erforderlich.\nKein Server bedeutet auch keine Zensur und keine Werbung.\nSHIFT erzeugt auch Liquid Micro Coins und kann verwendet werden, um anderen Mitgliedern Dankbarkeit zu zeigen.</string>
+    <string name="links">Links</string>
+    <string name="add_link">Add Link</string>
+    <string name="title">Title</string>
+    <string name="url">Url</string>
 </resources>

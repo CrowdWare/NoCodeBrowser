@@ -14,6 +14,10 @@
     <string name="settings">Agordoj</string>
     <string name="about_dialog_text">SHIFT KUNIGAS NIN ĈIUN\nSHIFT estas sencentra kaj tial ne funkcias sur servilo.\nVia SHIFT-konto estas anonima, nur viaj realaj amikoj scias, kiu estas malantaŭ via konto.\nNeniu registrado necesas.\nNeniu servilo signifas ankaŭ neniun cenzuron kaj neniujn reklamojn.\nSHIFT ankaŭ kreas likvidajn mikromonerojn kaj povas esti uzata por montri dankon al aliaj membroj.</string>
     <string name="personal_data">Persona informo</string>
+    <string name="links">Links</string>
+    <string name="add_link">Add Link</string>
+    <string name="title">Title</string>
+    <string name="url">Url</string>
 
 
 </resources>

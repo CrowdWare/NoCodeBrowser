@@ -13,8 +13,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,11 +61,15 @@ class MainActivity : ComponentActivity() {
 
                         Scaffold(modifier = Modifier.fillMaxSize()) {  _ ->
                             val list = mutableListOf(
-                                NavigationItem("home", contentLoader.appUrl, Icons.Default.Home, stringResource(R.string.navigation_home)),
-                                NavigationItem("about", contentLoader.appUrl, Icons.Default.Home, stringResource(R.string.navigation_about)),
-                                NavigationItem("settings", "", Icons.Default.Settings, stringResource(R.string.settings)),
-                                //NavigationItem("divider")
+                                NavigationItem("app.home", contentLoader.appUrl, Icons.Default.Home, stringResource(R.string.navigation_home)),
+                                NavigationItem("app.about", contentLoader.appUrl, Icons.Default.AccountCircle, stringResource(R.string.navigation_about)),
+                                NavigationItem("app.settings", "", Icons.Default.Settings, stringResource(R.string.settings)),
                             )
+                            if(contentLoader.links.isNotEmpty())
+                                list.add(NavigationItem("divider"))
+                            for(link in contentLoader.links) {
+                                list.add(NavigationItem(link.titel, link.url, Icons.Default.Star, link.titel))
+                            }
 
                             // navigation targets which are not listed in the drawer
                             for (file in app!!.deployment.files) {
@@ -72,7 +78,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
 
-                            //list.add(NavigationItem(id="video"))
                             NavigationView(list, context)
                         }
                     }

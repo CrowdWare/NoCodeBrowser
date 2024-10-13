@@ -70,5 +70,9 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("com.github.h0tk3y.betterParse:better-parse:0.4.4")
+
+    implementation("androidx.media3:media3-exoplayer:1.4.1")
+    implementation("androidx.media3:media3-exoplayer-dash:1.4.1")
+    implementation("androidx.media3:media3-ui:1.4.1")
     //implementation(files("libs/nocodeLib-debug.aar"))
 }

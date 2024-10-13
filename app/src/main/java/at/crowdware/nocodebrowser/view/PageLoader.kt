@@ -1,9 +1,15 @@
 package at.crowdware.nocodebrowser.view
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -25,13 +32,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.contentValuesOf
 import androidx.navigation.NavHostController
 import at.crowdware.nocodebrowser.MainActivity
 import at.crowdware.nocodebrowser.ui.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.IOException
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -39,7 +53,6 @@ import kotlinx.coroutines.withContext
 @Composable
 fun LoadPage(
     name: String,
-    url: String,
     navhostBackground: MutableState<Color>,
     mainActivity: MainActivity,
     navController: NavHostController
@@ -51,7 +64,7 @@ fun LoadPage(
 
     LaunchedEffect(Unit) {
         page = withContext(Dispatchers.IO) {
-            mainActivity.contentLoader.loadPage(name, url)
+            mainActivity.contentLoader.loadPage(name)
         }
         isLoading = false
     }
@@ -92,6 +105,7 @@ fun RenderPage(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun RenderElement(
     element: UIElement,
@@ -144,10 +158,10 @@ fun RenderElement(
             }
         }
         is UIElement.ImageElement -> {
-            dynamicImageFromAssets(filename = element.src, element.scale, element.link)
+            dynamicImageFromAssets(mainActivity, navController, filename = element.src, element.scale, element.link)
         }
         is UIElement.VideoElement -> {
-            dynamicVideofromAssets(element.src, element.height)
+            dynamicVideofromAssets(mainActivity, navController,element.src, element.height)
         }
         is UIElement.SoundElement -> {
             dynamicSoundfromAssets(element.src)
@@ -182,19 +196,109 @@ fun handleButtonClick(
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun dynamicImageFromAssets(filename: String, scale: String, link: String) {
-    // TODO: load Image from webserver
+fun dynamicImageFromAssets( mainActivity: MainActivity, navController: NavHostController, filename: String, scale: String, link: String) {
+    var cacheName by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        cacheName = withContext(Dispatchers.IO) {
+            mainActivity.contentLoader.loadAsset(filename)
+        }
+    }
+    if (cacheName.isNotEmpty()) {
+        val bitmap = loadBitmapFromAssets(mainActivity, cacheName)
+        if (bitmap != null) {
+            Image(
+                bitmap = bitmap.asImageBitmap(),
+                contentDescription = null,
+                contentScale = when(scale) {
+                    "crop" -> ContentScale.Crop
+                    "fit" -> ContentScale.Fit
+                    "inside" -> ContentScale.Inside
+                    "fillwidth" -> ContentScale.FillWidth
+                    "fillbounds" -> ContentScale.FillBounds
+                    "fillheight" -> ContentScale.FillHeight
+                    "none" -> ContentScale.None
+                    else -> ContentScale.Fit
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+      } else {
+          Text(text = "Image [$filename] not found")
+        }
+    } else {
+        Text(text = "Image [$filename] not loaded")
+    }
 }
+
 @Composable
 fun dynamicSoundfromAssets(filename: String) {
     // TODO: load Sound from webserver
 }
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun dynamicVideofromAssets(filename: String, height: Int) {
-    // TODO: load Video from webserver
+fun dynamicVideofromAssets(mainActivity: MainActivity, navController: NavHostController, filename: String, height: Int) {
+    var cacheName by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        cacheName = withContext(Dispatchers.IO) {
+            mainActivity.contentLoader.loadAsset(filename)
+        }
+    }
+   /*
+    val exoPlayer = remember { ExoPlayer.Builder(context).build() }
+    val mediaItem = remember(videoUri) {
+        if (videoUri.startsWith("http")) {
+            MediaItem.fromUri(Uri.parse(videoUri))
+        } else {
+            MediaItem.fromUri(Uri.parse("asset:///$videoUri"))
+        }
+    }
+    LaunchedEffect(mediaItem) {
+        exoPlayer.setMediaItem(mediaItem)
+        exoPlayer.prepare()
+    }
+    exoPlayer.playWhenReady = true
+
+    DisposableEffect(Unit) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+    AndroidView(
+        factory = { ctx ->
+            PlayerView(ctx).apply {
+                player = exoPlayer
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(element.height.dp)
+    )
+
+    */
 }
+
 @Composable
 fun dynamicYoutube(height: Int) {
     // TODO: load Youtube
+}
+
+fun loadBitmapFromAssets(context: Context, filename: String): Bitmap? {
+    return try {
+        // Get the file located in context.filesDir
+        val file = File(context.filesDir, filename)
+
+        // Check if the file exists
+        if (file.exists()) {
+            // Use BitmapFactory to decode the file into a Bitmap
+            BitmapFactory.decodeFile(file.absolutePath)
+        } else {
+            null // Return null if the file does not exist
+        }
+    } catch (e: IOException) {
+        e.printStackTrace()
+        null
+    }
 }
