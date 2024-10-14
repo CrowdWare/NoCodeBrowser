@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
     val contentLoader = ContentLoader()
     private var app: App? by mutableStateOf(null)
     private var loading by mutableStateOf(false)
-    private val url = "https://nocode.crowdware.at/sml/app.sml"
+    private val url = "https://crowdware.github.io/NoCodeBrowser/app.sml"
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {

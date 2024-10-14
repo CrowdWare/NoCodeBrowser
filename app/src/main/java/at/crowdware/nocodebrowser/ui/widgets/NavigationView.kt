@@ -25,6 +25,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
@@ -78,7 +79,7 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
     val context = LocalContext.current
     val pluginName = remember { mutableStateOf("App") }
 
-    NavHost(navController = navController, startDestination = "home", modifier = Modifier.background(color = navhostBackground.value)) {
+    NavHost(navController = navController, startDestination = "home", modifier = Modifier.background(color = navhostBackground.value).systemBarsPadding()) {
         for (index in items.indices) {
             composable(items[index].id) {
                 when (items[index].id) {
