@@ -1,23 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="icon">Ícone do Shift</string>
+    <string name="icon">Ícone</string>
+    <string name="home">Início</string>
+    <string name="settings">Configurações</string>
+    <string name="navigation_home">Página Inicial</string>
+    <string name="navigation_about">Sobre Nós</string>
+    <string name="about_shift">NoCodeBrowser 1.0</string>
+    <string name="about_dialog_text">NoCodeBrowser é uma maneira simples de carregar, testar e executar aplicativos dinamicamente pela Internet.\nIsso significa que o aplicativo completo é instalado em um servidor web e o conteúdo é automaticamente baixado pelo aplicativo.</string>
+    <string name="personal_data">Dados Pessoais</string>
+    <string name="select_preferred_language">Selecionar idioma preferido</string>
     <string name="language_english">Inglês</string>
     <string name="language_german">Alemão</string>
     <string name="language_spanish">Espanhol</string>
     <string name="language_french">Francês</string>
     <string name="language_portugues">Português</string>
     <string name="language_esperanto">Esperanto</string>
-    <string name="select_preferred_language">Selecione o idioma preferido</string>
-    <string name="navigation_home">Início</string>
-    <string name="navigation_about">Sobre</string>
-    <string name="about_shift">Sobre o SHIFT</string>
-    <string name="settings">Configurações</string>
-    <string name="about_dialog_text">SHIFT NOS CONECTA A TODOS\nSHIFT é descentralizado e, portanto, não funciona em um servidor.\nSua conta no SHIFT é anônima, apenas seus amigos reais sabem quem está por trás da sua conta.\nNão é necessário se registrar.\nSem servidor significa também sem censura e sem anúncios.\nO SHIFT também cria micro moedas líquidas e pode ser usado para demonstrar gratidão a outros membros.</string>
-    <string name="personal_data">Dados pessoais</string>
     <string name="links">Links</string>
-    <string name="add_link">Add Link</string>
-    <string name="title">Title</string>
+    <string name="add_link">Adicionar Link</string>
+    <string name="title">Título</string>
     <string name="url">Url</string>
-    <string name="add_new_link">Add new link</string>
-
+    <string name="add_new_link">Adicionar novo link</string>
 </resources>

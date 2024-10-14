@@ -1,24 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="icon">Shift-Ikono</string>
+    <string name="icon">Ikono</string>
+    <string name="home">Hejmo</string>
+    <string name="settings">Agordoj</string>
+    <string name="navigation_home">Ĉefpaĝo</string>
+    <string name="navigation_about">Pri ni</string>
+    <string name="about_shift">NoCodeBrowser 1.0</string>
+    <string name="about_dialog_text">NoCodeBrowser estas facila maniero por dinamike elŝuti, testi, kaj ruli aplikaĵojn per la interreto.\nTio signifas, ke la tuta aplikaĵo estas instalita sur retejo, kaj la enhavo estas aŭtomate elŝutita de la aplikaĵo.</string>
+    <string name="personal_data">Personaj Datumoj</string>
+    <string name="select_preferred_language">Elektu preferatan lingvon</string>
     <string name="language_english">Angla</string>
     <string name="language_german">Germana</string>
     <string name="language_spanish">Hispana</string>
     <string name="language_french">Franca</string>
     <string name="language_portugues">Portugala</string>
     <string name="language_esperanto">Esperanto</string>
-    <string name="select_preferred_language">Elektu preferatan lingvon</string>
-    <string name="navigation_home">Ĉefpaĝo</string>
-    <string name="navigation_about">Pri ni</string>
-    <string name="about_shift">Pri SHIFT</string>
-    <string name="settings">Agordoj</string>
-    <string name="about_dialog_text">SHIFT KUNIGAS NIN ĈIUN\nSHIFT estas sencentra kaj tial ne funkcias sur servilo.\nVia SHIFT-konto estas anonima, nur viaj realaj amikoj scias, kiu estas malantaŭ via konto.\nNeniu registrado necesas.\nNeniu servilo signifas ankaŭ neniun cenzuron kaj neniujn reklamojn.\nSHIFT ankaŭ kreas likvidajn mikromonerojn kaj povas esti uzata por montri dankon al aliaj membroj.</string>
-    <string name="personal_data">Persona informo</string>
-    <string name="links">Links</string>
-    <string name="add_link">Add Link</string>
-    <string name="title">Title</string>
-    <string name="url">Url</string>
-    <string name="add_new_link">Add new link</string>
-
-
+    <string name="links">Ligiloj</string>
+    <string name="add_link">Aldoni Ligon</string>
+    <string name="title">Titolo</string>
+    <string name="url">URL</string>
+    <string name="add_new_link">Aldoni novan ligon</string>
 </resources>

@@ -1,3 +1,22 @@
+/****************************************************************************
+ * Copyright (C) 2024 CrowdWare
+ *
+ * This file is part of NoCodeBrowser.
+ *
+ *  NoCodeBrowser is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  NoCodeBrowser is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with NoCodeBrowser.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ ****************************************************************************/
 package at.crowdware.nocodebrowser
 
 import android.os.Build
@@ -212,20 +231,23 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                         elements.add(img)
                     }
                     "Spacer" -> {
-                        val sp = SpacerElement(height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0)
+                        val sp = SpacerElement(
+                            amount = (properties["amount"] as? PropertyValue.IntValue)?.value ?: 0,
+                            weight = (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0
+                        )
                         elements.add(sp)
                     }
                     "Video" -> {
                         val vid = VideoElement(
-                            src = (properties["src"] as? PropertyValue.StringValue)?.value ?: "",
-                            height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 100
+                            src = (properties["src"] as? PropertyValue.StringValue)?.value ?: ""
+                            //height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 100
                         )
                         elements.add(vid)
                     }
                     "Youtube" -> {
                         val yt = YoutubeElement(
-                            id = (properties["id"] as? PropertyValue.StringValue)?.value ?: "",
-                            height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 100
+                            id = (properties["id"] as? PropertyValue.StringValue)?.value ?: ""
+                            //height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 100
                         )
                         elements.add(yt)
                     }

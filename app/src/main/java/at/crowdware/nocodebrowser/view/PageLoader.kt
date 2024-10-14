@@ -1,3 +1,22 @@
+/****************************************************************************
+ * Copyright (C) 2024 CrowdWare
+ *
+ * This file is part of NoCodeBrowser.
+ *
+ *  NoCodeBrowser is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  NoCodeBrowser is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with NoCodeBrowser.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ ****************************************************************************/
 package at.crowdware.nocodebrowser.view
 
 import android.annotation.SuppressLint
@@ -12,12 +31,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -28,6 +52,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,9 +64,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.contentValuesOf
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import at.crowdware.nocodebrowser.MainActivity
 import at.crowdware.nocodebrowser.ui.*
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -108,71 +140,181 @@ fun RenderPage(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
+fun RowScope.RenderElement(mainActivity: MainActivity, navController: NavHostController, element: UIElement) {
+    when(element) {
+        is UIElement.ColumnElement -> {
+            renderColumn(mainActivity, navController, element)
+        }
+        is UIElement.RowElement -> {
+            renderRow(mainActivity, navController, element)
+        }
+        is UIElement.TextElement -> {
+            renderText(element)
+        }
+        is UIElement.MarkdownElement -> {
+            renderMarkdown(element)
+        }
+        is UIElement.ButtonElement -> {
+            renderButton(mainActivity, navController, element)
+        }
+        is UIElement.ImageElement -> {
+            dynamicImageFromAssets(mainActivity, navController, element.src, element.scale, element.link)
+        }
+        is UIElement.VideoElement -> {
+            dynamicVideofromAssets(mainActivity, element.src)
+        }
+        is UIElement.SoundElement -> {
+            dynamicSoundfromAssets(mainActivity, element.src)
+        }
+        is UIElement.YoutubeElement -> {
+            dynamicYoutube(element.id)
+        }
+        is UIElement.SpacerElement -> {
+            var mod = Modifier as Modifier
+            if (element.amount > 0)
+                mod = mod.then(Modifier.width(element.amount.dp))
+            if (element.weight > 0)
+                mod = mod.then(Modifier.weight(element.weight.toFloat()))
+            Spacer(modifier = mod)
+        }
+        else -> {}
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun ColumnScope.RenderElement(mainActivity: MainActivity, navController: NavHostController, element: UIElement) {
+    when (element) {
+        is UIElement.ColumnElement -> {
+            renderColumn(mainActivity, navController, element)
+        }
+        is UIElement.RowElement -> {
+            renderRow(mainActivity, navController, element)
+        }
+        is UIElement.TextElement -> {
+            renderText(element)
+        }
+        is UIElement.MarkdownElement -> {
+            renderMarkdown(element)
+        }
+        is UIElement.ButtonElement -> {
+            renderButton(mainActivity, navController, element)
+        }
+        is UIElement.ImageElement -> {
+            dynamicImageFromAssets(mainActivity, navController, filename = element.src, element.scale, element.link)
+        }
+        is UIElement.VideoElement -> {
+            dynamicVideofromAssets(mainActivity, element.src)
+        }
+        is UIElement.SoundElement -> {
+            dynamicSoundfromAssets(mainActivity, element.src)
+        }
+        is UIElement.YoutubeElement -> {
+            dynamicYoutube(element.id)
+        }
+        is UIElement.SpacerElement -> {
+            var mod = Modifier as Modifier
+            if (element.amount > 0)
+                mod = mod.then(Modifier.height(element.amount.dp))
+            if (element.weight > 0)
+                mod = mod.then(Modifier.weight(element.weight.toFloat()))
+            Spacer(modifier = mod)
+        }
+        else -> {}
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun renderColumn(mainActivity: MainActivity, navcontroller: NavHostController, element: UIElement.ColumnElement) {
+    Column (modifier = Modifier.padding(
+        top = element.padding.top.dp,
+        bottom = element.padding.bottom.dp,
+        start = element.padding.left.dp,
+        end = element.padding.right.dp
+    )) {
+        for (ele in element.uiElements) {
+            RenderElement(mainActivity, navcontroller, ele)
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun renderRow(mainActivity: MainActivity, navController: NavHostController, element: UIElement.RowElement) {
+    Row (modifier = Modifier.padding(
+        top = element.padding.top.dp,
+        bottom = element.padding.bottom.dp,
+        start = element.padding.left.dp,
+        end = element.padding.right.dp
+    )) {
+        for (ele in element.uiElements) {
+            RenderElement(mainActivity, navController, ele)
+        }
+    }
+}
+
+@Composable
+fun renderText(element: UIElement.TextElement) {
+    Text(
+        text = element.text.trim(),
+        fontSize = element.fontSize,
+        style = TextStyle(color = element.color)
+    )
+}
+
+@Composable
+fun renderMarkdown(element: UIElement.MarkdownElement) {
+    val parsedMarkdown = parseMarkdown(element.text.trim())
+    Text(
+        text = parsedMarkdown,
+        style = TextStyle(color = hexToColor(element.color))
+    )
+}
+
+@Composable
+fun renderButton(mainActivity: MainActivity, navController: NavHostController, element: UIElement.ButtonElement) {
+    Button(modifier = Modifier.fillMaxWidth(), onClick =  { handleButtonClick(element.link, mainActivity, navController) }) {
+        Text(text = element.label)
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
 fun RenderElement(
     element: UIElement,
     mainActivity: MainActivity,
     navController: NavHostController
 ) {
     when (element) {
-        is UIElement.Zero -> {}
         is UIElement.ColumnElement -> {
-            Column (modifier = Modifier.padding(
-                top = element.padding.top.dp,
-                bottom = element.padding.bottom.dp,
-                start = element.padding.left.dp,
-                end = element.padding.right.dp
-            )) {
-                for (ele in element.uiElements) {
-                    RenderElement(ele, mainActivity, navController)
-                }
-            }
+            renderColumn(mainActivity, navController, element)
         }
         is UIElement.RowElement -> {
-            Row (modifier = Modifier.padding(
-                top = element.padding.top.dp,
-                bottom = element.padding.bottom.dp,
-                start = element.padding.left.dp,
-                end = element.padding.right.dp
-            )) {
-                for (ele in element.uiElements) {
-                    RenderElement(ele, mainActivity, navController)
-                }
-            }
+            renderRow(mainActivity, navController, element)
         }
         is UIElement.TextElement -> {
-            Text(
-                text = element.text.trim(),
-                fontSize = element.fontSize,
-                style = TextStyle(color = element.color)
-            )
+            renderText(element)
         }
         is UIElement.MarkdownElement -> {
-            val parsedMarkdown = parseMarkdown(element.text.trim())
-            Text(
-                text = parsedMarkdown,
-                style = TextStyle(color = hexToColor(element.color))
-            )
+           renderMarkdown(element)
         }
         is UIElement.ButtonElement -> {
-            Button(modifier = Modifier.fillMaxWidth(), onClick =  { handleButtonClick(element.link, mainActivity, navController) }) {
-                Text(text = element.label)
-            }
+            renderButton(mainActivity, navController, element)
         }
         is UIElement.ImageElement -> {
             dynamicImageFromAssets(mainActivity, navController, filename = element.src, element.scale, element.link)
         }
         is UIElement.VideoElement -> {
-            dynamicVideofromAssets(mainActivity, navController,element.src, element.height)
+            dynamicVideofromAssets(mainActivity,element.src)
         }
         is UIElement.SoundElement -> {
-            dynamicSoundfromAssets(element.src)
-        }
-        is UIElement.SpacerElement -> {
-            Spacer(modifier = Modifier.height(element.height.dp))
+            dynamicSoundfromAssets(mainActivity, element.src)
         }
         is UIElement.YoutubeElement -> {
-            dynamicYoutube(element.height)
+            dynamicYoutube(element.id)
         }
+        else -> {}
     }
 }
 
@@ -199,7 +341,7 @@ fun handleButtonClick(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun dynamicImageFromAssets( mainActivity: MainActivity, navController: NavHostController, filename: String, scale: String, link: String) {
+fun dynamicImageFromAssets( mainActivity: MainActivity, navcontroller: NavController, filename: String, scale: String, link: String) {
     var cacheName by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
@@ -233,13 +375,9 @@ fun dynamicImageFromAssets( mainActivity: MainActivity, navController: NavHostCo
     }
 }
 
-@Composable
-fun dynamicSoundfromAssets(filename: String) {
-    // TODO: load Sound from webserver
-}
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun dynamicVideofromAssets(mainActivity: MainActivity, navController: NavHostController, filename: String, height: Int) {
+fun dynamicSoundfromAssets(mainActivity: MainActivity, filename: String) {
     var cacheName by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
@@ -247,43 +385,94 @@ fun dynamicVideofromAssets(mainActivity: MainActivity, navController: NavHostCon
             mainActivity.contentLoader.loadAsset(filename)
         }
     }
-   /*
-    val exoPlayer = remember { ExoPlayer.Builder(context).build() }
-    val mediaItem = remember(videoUri) {
-        if (videoUri.startsWith("http")) {
-            MediaItem.fromUri(Uri.parse(videoUri))
-        } else {
-            MediaItem.fromUri(Uri.parse("asset:///$videoUri"))
-        }
-    }
-    LaunchedEffect(mediaItem) {
-        exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare()
-    }
-    exoPlayer.playWhenReady = true
-
-    DisposableEffect(Unit) {
-        onDispose {
-            exoPlayer.release()
-        }
-    }
-    AndroidView(
-        factory = { ctx ->
-            PlayerView(ctx).apply {
-                player = exoPlayer
+    if (cacheName.isNotEmpty()) {
+        val exoPlayer = remember { ExoPlayer.Builder(mainActivity).build() }
+        val mediaItem = remember(filename) {
+            if (filename.startsWith("http")) {
+                MediaItem.fromUri(Uri.parse(cacheName))
+            } else {
+                val file = File(mainActivity.filesDir, cacheName)
+                val uri = Uri.fromFile(file)
+                MediaItem.fromUri(uri)
             }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(element.height.dp)
-    )
+        }
+        LaunchedEffect(mediaItem) {
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.prepare()
+        }
+        exoPlayer.playWhenReady = true
 
-    */
+        DisposableEffect(Unit) {
+            onDispose {
+                exoPlayer.release()
+            }
+        }
+    }
+}
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun dynamicVideofromAssets(mainActivity: MainActivity, filename: String) {
+    var cacheName by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        cacheName = withContext(Dispatchers.IO) {
+            mainActivity.contentLoader.loadAsset(filename)
+        }
+    }
+    if (cacheName.isNotEmpty()) {
+        val exoPlayer = remember { ExoPlayer.Builder(mainActivity).build() }
+        val mediaItem = remember(filename) {
+            if (filename.startsWith("http")) {
+                MediaItem.fromUri(Uri.parse(cacheName))
+            } else {
+                val file = File(mainActivity.filesDir, cacheName)
+                val uri = Uri.fromFile(file)
+                MediaItem.fromUri(uri)
+            }
+        }
+        LaunchedEffect(mediaItem) {
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.prepare()
+        }
+        exoPlayer.playWhenReady = true
+
+        DisposableEffect(Unit) {
+            onDispose {
+                exoPlayer.release()
+            }
+        }
+        AndroidView(
+            factory = { ctx ->
+                PlayerView(ctx).apply {
+                    player = exoPlayer
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+    }
 }
 
 @Composable
-fun dynamicYoutube(height: Int) {
-    // TODO: load Youtube
+fun dynamicYoutube(videoId: String) {
+    val ctx = LocalContext.current
+
+    AndroidView(
+        factory = {
+            var view = YouTubePlayerView(it)
+            val fragment = view.addYouTubePlayerListener(
+                object : AbstractYouTubePlayerListener() {
+                    override fun onReady(
+                        youTubePlayer:
+                        YouTubePlayer
+                    ) {
+                        super.onReady(youTubePlayer)
+                        youTubePlayer.loadVideo(videoId, 0f)
+                    }
+                }
+            )
+            view
+        })
 }
 
 fun loadBitmapFromAssets(context: Context, filename: String): Bitmap? {

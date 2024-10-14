@@ -68,12 +68,19 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation("androidx.navigation:navigation-compose:2.6.0")
+    // rest client
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    // grammar for parsing SML
     implementation("com.github.h0tk3y.betterParse:better-parse:0.4.4")
 
+    // video player
     implementation("androidx.media3:media3-exoplayer:1.4.1")
     implementation("androidx.media3:media3-exoplayer-dash:1.4.1")
     implementation("androidx.media3:media3-ui:1.4.1")
 
-    //implementation(files("libs/nocodeLib-debug.aar"))
+    // youtube player
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
+
+    // Lua scripting
+    implementation("com.bennyhuo:luajavax:1.0")
 }

@@ -1,3 +1,22 @@
+/****************************************************************************
+ * Copyright (C) 2024 CrowdWare
+ *
+ * This file is part of NoCodeBrowser.
+ *
+ *  NoCodeBrowser is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  NoCodeBrowser is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with NoCodeBrowser.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ ****************************************************************************/
 package at.crowdware.nocodebrowser
 
 import android.annotation.SuppressLint
@@ -31,6 +50,7 @@ import at.crowdware.nocodebrowser.ui.widgets.NavigationView
 import at.crowdware.nocodebrowser.utils.ContentLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.bennyhuo.luajavax.LuaFactory
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 class MainActivity : ComponentActivity() {
@@ -44,6 +64,27 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val context = this
 
+        /* working LUA sample
+        class Method {
+            fun sayHello(name: String) {
+                println("Method:sayHello(" + name + ") called")
+            }
+        }
+
+        LuaFactory.createLua(this).use { lua ->
+            lua.redirectStdioToLogcat()
+            lua["method"] = Method() // register object
+            lua.runText("print('hello from lua')")
+            lua.runText("method:sayHello('Horst')")
+            lua.runText("""
+            n = 2.0
+            i = 3
+            x = i * n
+        """.trimIndent())
+            val x = lua.getDouble("x")
+            println("x = $x")
+        }
+*/
         contentLoader.init(this)
         lifecycleScope.launch(Dispatchers.Main) {
             // load the dynamic app, we can change the content on the web server

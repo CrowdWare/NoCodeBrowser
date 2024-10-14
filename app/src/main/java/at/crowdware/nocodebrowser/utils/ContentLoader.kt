@@ -1,3 +1,22 @@
+/****************************************************************************
+ * Copyright (C) 2024 CrowdWare
+ *
+ * This file is part of NoCodeBrowser.
+ *
+ *  NoCodeBrowser is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  NoCodeBrowser is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with NoCodeBrowser.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ ****************************************************************************/
 package at.crowdware.nocodebrowser.utils
 import android.content.Context
 import android.os.Binder
@@ -75,7 +94,7 @@ class ContentLoader {
         if (result == null) {
             return ""
         }
-        val fileName = ("ContentCache/" + appUrl.substringAfter("://") + "/assets/$name").replace(".", "_").replace(":", "_")
+        val fileName = ("ContentCache/" + appUrl.substringAfter("://") + "/assets/").replace(".", "_").replace(":", "_") + "$name"
         val file = File(context.filesDir, fileName)
         var ret = true
         if (file.exists()) {
@@ -104,7 +123,6 @@ class ContentLoader {
     suspend fun loadPage(name: String): Page? {
         var fileContent = ""
         val url = "$appUrl/pages/$name.sml"
-        println(url)
         if (app == null)
             return null
         val result = app!!.deployment.files.find { it.path == "$name.sml" }
@@ -198,7 +216,6 @@ class ContentLoader {
 
     // Suspend function to download content asynchronously
     suspend fun downloadSml(url: String): String? = withContext(Dispatchers.IO) {
-        println("downloadSml: $url")
         val request = Request.Builder().url(url).build()
         return@withContext try {
             // Use OkHttp's enqueue for asynchronous call

@@ -1,21 +1,22 @@
-/*
+/****************************************************************************
  * Copyright (C) 2024 CrowdWare
  *
- * This file is part of NoCodeLib.
+ * This file is part of NoCodeBrowser.
  *
- *  NoCodeLib is free software: you can redistribute it and/or modify
+ *  NoCodeBrowser is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  NoCodeLib is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  NoCodeBrowser is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with NoCodeLib.  If not, see <http://www.gnu.org/licenses/>.
- */
+ *  along with NoCodeBrowser.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ ****************************************************************************/
 
 package at.crowdware.nocodebrowser.ui
 import androidx.compose.ui.graphics.Color
@@ -23,8 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import java.time.LocalDateTime
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
+
 
 data class App(
     var name: String = "",
@@ -72,13 +72,12 @@ sealed class UIElement {
         val scale: String,
         val link: String) : UIElement()
     data class SpacerElement(
-        val height: Int) : UIElement()
+        val amount: Int,
+        val weight: Int) : UIElement()
     data class VideoElement(
-        val src: String,
-    val height: Int) : UIElement()
+        val src: String) : UIElement()
     data class YoutubeElement(
-        val id: String,
-        val height: Int) : UIElement()
+        val id: String) : UIElement()
     data class SoundElement(
         val src: String) : UIElement()
     data class RowElement(
