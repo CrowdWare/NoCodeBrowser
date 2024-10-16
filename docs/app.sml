@@ -5,7 +5,7 @@ App {
  smlVersion: "1.1"
 
   Theme {
-    primary: "#825500"
+    primary: "#FF0c8ce9"
     onPrimary: "#FFFFFF"
     primaryContainer: "#FFDDB3"
     onPrimaryContainer: "#291800"
@@ -36,11 +36,12 @@ App {
     scrim: "#000000"
   }
 
+
 // deployment start - don't edit here
 Deployment {
   File { path: "about.sml" time: "2024.10.16 06.39.16" }
   File { path: "video.sml" time: "2024.10.16 03.52.20" }
-  File { path: "home.sml" time: "2024.10.16 05.20.37" }
+  File { path: "home.sml" time: "2024.10.16 14.27.28" }
   File { path: "desktop.png" time: "2024.10.14 09.37.53" }
   File { path: "ship.png" time: "2024.09.03 09.08.18" }
   File { path: "beach.mp4" time: "2024.09.13 17.31.39" }

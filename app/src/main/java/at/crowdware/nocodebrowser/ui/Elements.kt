@@ -19,6 +19,7 @@
  ****************************************************************************/
 
 package at.crowdware.nocodebrowser.ui
+import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -63,11 +64,9 @@ data class ThemeElement(
     var inverseOnSurface: String = "",
     var inverseSurface: String = "",
     var inversePrimary: String = "",
-    var shadow: String = "",
     var surfaceTint: String = "",
     var outlineVariant: String = "",
-    var scrim: String = "",
-    var seed: String = ""
+    var scrim: String = ""
 )
 
 data class NavigationElement(
@@ -94,7 +93,7 @@ sealed class UIElement {
     data object Zero : UIElement()
     data class TextElement(
         val text: String,
-        val color: Color,
+        val color: String,
         val fontSize: TextUnit,
         val fontWeight: FontWeight,
         val textAlign: TextAlign

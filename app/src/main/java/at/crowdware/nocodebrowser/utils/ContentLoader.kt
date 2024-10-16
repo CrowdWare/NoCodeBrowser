@@ -22,6 +22,8 @@ import android.content.Context
 import android.os.Binder
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import at.crowdware.nocodebrowser.parseApp
 import at.crowdware.nocodebrowser.parsePage
 import at.crowdware.nocodebrowser.ui.App
@@ -174,6 +176,7 @@ class ContentLoader {
     }
 
     // Suspend function to load the app asynchronously
+    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun loadApp(url: String): App? = withContext(Dispatchers.IO) {
         var fileContent = ""
 

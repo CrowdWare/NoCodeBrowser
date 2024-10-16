@@ -21,6 +21,8 @@ package at.crowdware.nocodebrowser
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
@@ -101,6 +103,7 @@ object SmlGrammar : Grammar<List<Any>>() {
     override val rootParser: Parser<List<Any>> = (oneOrMore(element) and ignoredParser).map { (elements, _) -> elements }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun deserializeApp(parsedResult: List<Any>): App {
     val app = App()
 
@@ -174,8 +177,8 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                     "Text" -> {
                         elements.add(
                             TextElement(
-                            text = (properties["text"] as? PropertyValue.StringValue)?.value ?: "def",
-                            color = hexToColor((properties["color"] as? PropertyValue.StringValue)?.value ?: ""),
+                            text = (properties["text"] as? PropertyValue.StringValue)?.value ?: "",
+                            color = (properties["color"] as? PropertyValue.StringValue)?.value ?: "",
                             fontSize = ((properties["fontSize"] as? PropertyValue.IntValue)?.value ?: 14).sp,
                             fontWeight = when((properties["fontWeight"] as? PropertyValue.StringValue)?.value ?: "") {
                                 "bold" -> { FontWeight.Bold }
@@ -210,7 +213,7 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                         val md = ((properties["text"] as? PropertyValue.StringValue)?.value ?: "").split("\n").joinToString("\n") { it.trim() }
                         val ele = MarkdownElement(
                             text = md,
-                            color = (properties["color"] as? PropertyValue.StringValue)?.value ?: "#FFFFFF",
+                            color = (properties["color"] as? PropertyValue.StringValue)?.value ?: "",
                             fontSize = ((properties["fontSize"] as? PropertyValue.IntValue)?.value ?: 14).sp,
                             fontWeight = when((properties["fontWeight"] as? PropertyValue.StringValue)?.value ?: "") {
                                 "bold" -> { FontWeight.Bold }
@@ -297,8 +300,6 @@ fun parseNestedAppElements(nestedElements: List<Any>, app: App) {
                         parseNestedDeployElements(extractChildElements(element), app.deployment)
                     }
                     "Theme" -> {
-                        app.theme.seed = (properties["seed"] as? PropertyValue.StringValue)?.value ?: ""
-                        app.theme.shadow = (properties["shadow"] as? PropertyValue.StringValue)?.value ?: ""
                         app.theme.error = (properties["error"] as? PropertyValue.StringValue)?.value ?: ""
                         app.theme.scrim = (properties["scrim"] as? PropertyValue.StringValue)?.value ?: ""
                         app.theme.onError = (properties["onError"] as? PropertyValue.StringValue)?.value ?: ""
@@ -384,6 +385,7 @@ fun parsePage(sml: String): Page? {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun parseApp(sml: String): App? {
     try {
         val result = SmlGrammar.parseToEnd(sml)

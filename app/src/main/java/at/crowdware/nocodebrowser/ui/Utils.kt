@@ -23,6 +23,7 @@ import android.content.Context
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -30,21 +31,119 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
-import okhttp3.Cache
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
+import at.crowdware.nocodebrowser.MainActivity
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.io.ByteArrayInputStream
-import java.io.IOException
 import javax.xml.parsers.DocumentBuilderFactory
 
+@Composable
+fun colorNameToColor(colorName: String): String {
+    val context = LocalContext.current as MainActivity
+    val contentLoader = context.contentLoader
+        return when (colorName) {
+            "primary" -> {
+                contentLoader.app?.theme?.primary ?: ""
+            }
+
+            "onPrimary" -> {
+                contentLoader.app?.theme?.onPrimary ?: ""
+            }
+
+            "primaryContainer" -> {
+                contentLoader.app?.theme?.primaryContainer ?: ""
+            }
+
+            "onPrimaryContainer" -> {
+                contentLoader.app?.theme?.onPrimaryContainer ?: ""
+            }
+
+            "surface" -> {
+                contentLoader.app?.theme?.surface ?: ""
+            }
+
+            "onSurface" -> {
+                contentLoader.app?.theme?.onSurface ?: ""
+            }
+
+            "secondary" -> {
+                contentLoader.app?.theme?.secondary ?: ""
+            }
+
+            "onSecondary" -> {
+                contentLoader.app?.theme?.onSecondary ?: ""
+            }
+
+            "secondaryContainer" -> {
+                contentLoader.app?.theme?.secondaryContainer ?: ""
+            }
+
+            "onSecondaryContainer" -> {
+                contentLoader.app?.theme?.onSecondaryContainer ?: ""
+            }
+
+            "tertiary" -> {
+                contentLoader.app?.theme?.tertiary ?: ""
+            }
+
+            "onTertiary" -> {
+                contentLoader.app?.theme?.onTertiary ?: ""
+            }
+
+            "tertiaryContainer" -> {
+                contentLoader.app?.theme?.tertiaryContainer ?: ""
+            }
+
+            "onTertiaryContainer" -> {
+                contentLoader.app?.theme?.onTertiaryContainer ?: ""
+            }
+
+            "outline" -> {
+                contentLoader.app?.theme?.outline ?: ""
+            }
+
+            "outlineVariant" -> {
+                contentLoader.app?.theme?.outlineVariant ?: ""
+            }
+
+            "onErrorContainer" -> {
+                contentLoader.app?.theme?.onErrorContainer ?: ""
+            }
+
+            "onError" -> {
+                contentLoader.app?.theme?.onError ?: ""
+            }
+
+            "inverseSurface" -> {
+                contentLoader.app?.theme?.inverseSurface ?: ""
+            }
+
+            "inversePrimary" -> {
+                contentLoader.app?.theme?.inversePrimary ?: ""
+            }
+
+            "inverseOnSurface" -> {
+                contentLoader.app?.theme?.inverseOnSurface ?: ""
+            }
+            "background" -> {
+                contentLoader.app?.theme?.background ?: ""
+            }
+            "error" -> {
+                contentLoader.app?.theme?.error ?: ""
+            }
+            "scrim" -> {
+                contentLoader.app?.theme?.scrim ?: ""
+            }
+            else -> { ""}
+        }
+
+    return ""
+}
 
 @Composable
-fun hexToColor(hex: String): Color {
+fun hexToColor(hex: String, default: Color): Color {
+    var value: Color
     if(!hex.startsWith("#")) {
-        var value = Color.Transparent
         when(hex) {
             "primary" -> {value = MaterialTheme.colorScheme.primary }
             "onPrimary" -> {value =MaterialTheme.colorScheme.onPrimary }
@@ -68,9 +167,10 @@ fun hexToColor(hex: String): Color {
             "inversePrimary" -> {value = MaterialTheme.colorScheme.inversePrimary }
             "inverseOnSurface" -> {value = MaterialTheme.colorScheme.inverseOnSurface }
             "background" -> {value = MaterialTheme.colorScheme.background }
+            "onBackground" -> {value = MaterialTheme.colorScheme.onBackground }
             "error" -> {value = MaterialTheme.colorScheme.error }
             "scrim" -> {value = MaterialTheme.colorScheme.scrim }
-            else -> {}
+            else -> {value = default}
         }
         return value
     }
@@ -92,7 +192,7 @@ fun hexToColor(hex: String): Color {
             val b = color.substring(6, 8).toIntOrNull(16) ?: return Color.Black
             Color(r, g, b, a)
         }
-        else -> Color.Black
+        else -> default
     }
 }
 

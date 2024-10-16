@@ -21,13 +21,17 @@ package at.crowdware.nocodebrowser.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import at.crowdware.nocodebrowser.ui.ThemeElement
+import at.crowdware.nocodebrowser.ui.hexToColor
 
 private val DarkColorScheme = darkColorScheme(
     primary = Primary,
@@ -49,23 +53,43 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun NoCodeBrowserTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    theme: ThemeElement = ThemeElement(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val scheme = ColorScheme(
+        hexToColor(theme.primary, MaterialTheme.colorScheme.primary),
+        hexToColor(theme.onPrimary, MaterialTheme.colorScheme.onPrimary),
+        hexToColor(theme.primaryContainer, MaterialTheme.colorScheme.primaryContainer),
+        hexToColor(theme.onPrimaryContainer, MaterialTheme.colorScheme.onPrimaryContainer),
+        hexToColor(theme.inversePrimary, MaterialTheme.colorScheme.inversePrimary),
+        hexToColor(theme.secondary, MaterialTheme.colorScheme.secondary),
+        hexToColor(theme.onSecondary, MaterialTheme.colorScheme.onSecondary),
+        hexToColor(theme.secondaryContainer, MaterialTheme.colorScheme.secondaryContainer),
+        hexToColor(theme.onSecondaryContainer, MaterialTheme.colorScheme.onSecondaryContainer),
+        hexToColor(theme.tertiary, MaterialTheme.colorScheme.tertiary),
+        hexToColor(theme.onTertiary, MaterialTheme.colorScheme.onTertiary),
+        hexToColor(theme.tertiaryContainer, MaterialTheme.colorScheme.tertiaryContainer),
+        hexToColor(theme.onTertiaryContainer, MaterialTheme.colorScheme.onTertiaryContainer),
+        hexToColor(theme.background, MaterialTheme.colorScheme.background),
+        hexToColor(theme.onBackground, MaterialTheme.colorScheme.onBackground),
+        hexToColor(theme.surface, MaterialTheme.colorScheme.surface),
+        hexToColor(theme.onSurface, MaterialTheme.colorScheme.onSurface),
+        hexToColor(theme.surfaceVariant, MaterialTheme.colorScheme.surfaceVariant),
+        hexToColor(theme.onSurfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant),
+        hexToColor(theme.surfaceTint, MaterialTheme.colorScheme.surfaceTint),
+        hexToColor(theme.inverseSurface, MaterialTheme.colorScheme.inverseSurface),
+        hexToColor(theme.inverseOnSurface, MaterialTheme.colorScheme.inverseOnSurface),
+        hexToColor(theme.error, MaterialTheme.colorScheme.error),
+        hexToColor(theme.onError, MaterialTheme.colorScheme.onError),
+        hexToColor(theme.errorContainer, MaterialTheme.colorScheme.errorContainer),
+        hexToColor(theme.onErrorContainer, MaterialTheme.colorScheme.onErrorContainer),
+        hexToColor(theme.outline, MaterialTheme.colorScheme.outline),
+        hexToColor(theme.outlineVariant, MaterialTheme.colorScheme.outlineVariant),
+        hexToColor(theme.scrim, MaterialTheme.colorScheme.scrim))
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = scheme,
         typography = Typography,
         content = content
     )

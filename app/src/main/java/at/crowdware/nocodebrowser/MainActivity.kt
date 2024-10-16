@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
             if (app != null) {
                 enableEdgeToEdge()
                 setContent {
-                    NoCodeBrowserTheme {
+                    NoCodeBrowserTheme(app!!.theme) {
                         LocaleManager.init(applicationContext, resources)
 
                         Scaffold(modifier = Modifier.fillMaxSize()) {  _ ->
