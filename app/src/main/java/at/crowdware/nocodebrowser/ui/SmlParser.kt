@@ -208,13 +208,35 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                     }
                     "Markdown" -> {
                         val md = ((properties["text"] as? PropertyValue.StringValue)?.value ?: "").split("\n").joinToString("\n") { it.trim() }
-                        val ele = MarkdownElement(text = md, color = (properties["color"] as? PropertyValue.StringValue)?.value ?: "#FFFFFF")
+                        val ele = MarkdownElement(
+                            text = md,
+                            color = (properties["color"] as? PropertyValue.StringValue)?.value ?: "#FFFFFF",
+                            fontSize = ((properties["fontSize"] as? PropertyValue.IntValue)?.value ?: 14).sp,
+                            fontWeight = when((properties["fontWeight"] as? PropertyValue.StringValue)?.value ?: "") {
+                                "bold" -> { FontWeight.Bold }
+                                "black" -> { FontWeight.Black }
+                                "thin" -> { FontWeight.Thin }
+                                "extrabold" -> { FontWeight.ExtraBold }
+                                "extralight" -> { FontWeight.ExtraLight }
+                                "light" -> { FontWeight.Light }
+                                "medium" -> { FontWeight.Medium }
+                                "semibold" -> { FontWeight.SemiBold }
+                                else -> { FontWeight.Normal }
+                            },
+                            textAlign = when((properties["textAlign"] as? PropertyValue.StringValue)?.value ?: "") {
+                                "left" -> { TextAlign.Start }
+                                "center" -> { TextAlign.Center }
+                                "right" -> { TextAlign.End }
+                                else -> { TextAlign.Unspecified }
+                            })
                         elements.add(ele)
                     }
                     "Button" -> {
                         val btn = ButtonElement(
                             label = (properties["label"] as? PropertyValue.StringValue)?.value ?: "",
-                            link = (properties["link"] as? PropertyValue.StringValue)?.value ?: ""
+                            link = (properties["link"] as? PropertyValue.StringValue)?.value ?: "",
+                            color = (properties["color"] as? PropertyValue.StringValue)?.value ?: "",
+                            backgroundColor = (properties["backgroundColor"] as? PropertyValue.StringValue)?.value ?: ""
                         )
                         elements.add(btn)
                     }
@@ -257,6 +279,7 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun parseNestedAppElements(nestedElements: List<Any>, app: App) {
     nestedElements.forEach { element ->
         when (element) {
@@ -272,6 +295,38 @@ fun parseNestedAppElements(nestedElements: List<Any>, app: App) {
                     }
                     "Deployment" -> {
                         parseNestedDeployElements(extractChildElements(element), app.deployment)
+                    }
+                    "Theme" -> {
+                        app.theme.seed = (properties["seed"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.shadow = (properties["shadow"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.error = (properties["error"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.scrim = (properties["scrim"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onError = (properties["onError"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.background = (properties["background"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.errorContainer = (properties["errorContainer"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.inverseOnSurface = (properties["inverseOnSurface"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.inversePrimary = (properties["inversePrimary"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.inverseSurface = (properties["inverseSurface"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onBackground = (properties["onBackground"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onErrorContainer = (properties["onErrorContainer"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onPrimary = (properties["onPrimary"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onPrimaryContainer = (properties["onPrimaryContainer"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onSecondary = (properties["onSecondary"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onSecondaryContainer = (properties["onSecondaryContainer"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onSurface = (properties["onSurface"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onSurfaceVariant = (properties["onSurfaceVariant"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onTertiary = (properties["onTertiary"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onTertiaryContainer = (properties["onTertiaryContainer"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.outline = (properties["outline"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.outlineVariant = (properties["outlineVariant"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.primary = (properties["primary"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onPrimaryContainer = (properties["error"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.secondary = (properties["onPrimaryContainer"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.onSecondaryContainer = (properties["error"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.surfaceTint = (properties["onSecondaryContainer"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.surfaceVariant = (properties["surfaceVariant"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.tertiary = (properties["tertiary"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.theme.tertiaryContainer = (properties["tertiaryContainer"] as? PropertyValue.StringValue)?.value ?: ""
                     }
                 }
             }

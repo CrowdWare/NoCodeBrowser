@@ -43,6 +43,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -258,8 +260,12 @@ fun renderRow(mainActivity: MainActivity, navController: NavHostController, elem
 fun renderText(element: UIElement.TextElement) {
     Text(
         text = element.text.trim(),
-        fontSize = element.fontSize,
-        style = TextStyle(color = element.color)
+        style = TextStyle(
+            color = element.color,
+            fontSize = element.fontSize,
+            fontWeight = element.fontWeight,
+            textAlign = element.textAlign
+        )
     )
 }
 
@@ -268,13 +274,33 @@ fun renderMarkdown(element: UIElement.MarkdownElement) {
     val parsedMarkdown = parseMarkdown(element.text.trim())
     Text(
         text = parsedMarkdown,
-        style = TextStyle(color = hexToColor(element.color))
+        style = TextStyle(
+            color = hexToColor(element.color),
+            fontSize = element.fontSize,
+            fontWeight = element.fontWeight,
+            textAlign = element.textAlign
+        )
     )
 }
 
 @Composable
 fun renderButton(mainActivity: MainActivity, navController: NavHostController, element: UIElement.ButtonElement) {
-    Button(modifier = Modifier.fillMaxWidth(), onClick =  { handleButtonClick(element.link, mainActivity, navController) }) {
+    var colors = buttonColors()
+
+    if(element.color.isNotEmpty() && element.backgroundColor.isNotEmpty())
+        colors = buttonColors(
+            containerColor = hexToColor(element.backgroundColor),
+            contentColor = hexToColor(element.color))
+    else if(element.color.isNotEmpty())
+        colors = buttonColors(contentColor = hexToColor(element.color))
+    else if(element.backgroundColor.isNotEmpty())
+        colors = buttonColors(
+            containerColor = hexToColor(element.backgroundColor))
+
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = colors,
+        onClick =  { handleButtonClick(element.link, mainActivity, navController) }) {
         Text(text = element.label)
     }
 }

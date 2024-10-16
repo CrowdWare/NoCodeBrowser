@@ -20,6 +20,8 @@
 package at.crowdware.nocodebrowser.ui
 
 import android.content.Context
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -39,7 +41,40 @@ import java.io.IOException
 import javax.xml.parsers.DocumentBuilderFactory
 
 
+@Composable
 fun hexToColor(hex: String): Color {
+    if(!hex.startsWith("#")) {
+        var value = Color.Transparent
+        when(hex) {
+            "primary" -> {value = MaterialTheme.colorScheme.primary }
+            "onPrimary" -> {value =MaterialTheme.colorScheme.onPrimary }
+            "primaryContainer" -> {value = MaterialTheme.colorScheme.primaryContainer }
+            "onPrimaryContainer" -> {value = MaterialTheme.colorScheme.onPrimaryContainer }
+            "surface" -> {value = MaterialTheme.colorScheme.surface  }
+            "onSurface" -> {value = MaterialTheme.colorScheme.onSurface }
+            "secondary" -> {value = MaterialTheme.colorScheme.secondary }
+            "onSecondary" -> {value = MaterialTheme.colorScheme.onSecondary }
+            "secondaryContainer" -> {value = MaterialTheme.colorScheme.secondaryContainer }
+            "onSecondaryContainer" -> {value = MaterialTheme.colorScheme.onSecondaryContainer }
+            "tertiary" -> {value = MaterialTheme.colorScheme.tertiary }
+            "onTertiary" -> {value =MaterialTheme.colorScheme.onTertiary }
+            "tertiaryContainer" -> {value = MaterialTheme.colorScheme.tertiaryContainer }
+            "onTertiaryContainer" -> {value = MaterialTheme.colorScheme.onTertiaryContainer }
+            "outline" -> {value = MaterialTheme.colorScheme.outline  }
+            "outlineVariant" -> {value = MaterialTheme.colorScheme.outlineVariant }
+            "onErrorContainer" -> {value = MaterialTheme.colorScheme.onErrorContainer }
+            "onError" -> {value = MaterialTheme.colorScheme.onError }
+            "inverseSurface" -> {value = MaterialTheme.colorScheme.inverseSurface  }
+            "inversePrimary" -> {value = MaterialTheme.colorScheme.inversePrimary }
+            "inverseOnSurface" -> {value = MaterialTheme.colorScheme.inverseOnSurface }
+            "background" -> {value = MaterialTheme.colorScheme.background }
+            "error" -> {value = MaterialTheme.colorScheme.error }
+            "scrim" -> {value = MaterialTheme.colorScheme.scrim }
+            else -> {}
+        }
+        return value
+    }
+
     val color = hex.trimStart('#')
     return when (color.length) {
         6 -> {

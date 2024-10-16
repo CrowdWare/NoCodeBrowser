@@ -31,8 +31,43 @@ data class App(
     var icon: String = "",
     var id: String = "",
     var smlVersion: String = "",
-    val navigation: NavigationElement = NavigationElement(),
-    val deployment: DeploymentElement = DeploymentElement()
+    var theme: ThemeElement = ThemeElement(),
+    var navigation: NavigationElement = NavigationElement(),
+    var deployment: DeploymentElement = DeploymentElement()
+)
+
+data class ThemeElement(
+    var primary: String = "",
+    var onPrimary: String = "",
+    var primaryContainer: String = "",
+    var onPrimaryContainer: String = "",
+    var secondary: String = "",
+    var onSecondary: String = "",
+    var secondaryContainer: String = "",
+    var onSecondaryContainer: String = "",
+    var tertiary: String = "",
+    var onTertiary: String = "",
+    var tertiaryContainer: String = "",
+    var onTertiaryContainer: String = "",
+    var error: String = "",
+    var errorContainer: String = "",
+    var onError: String = "",
+    var onErrorContainer: String = "",
+    var background: String = "",
+    var onBackground: String = "",
+    var surface: String = "",
+    var onSurface: String = "",
+    var surfaceVariant: String = "",
+    var onSurfaceVariant: String = "",
+    var outline: String = "",
+    var inverseOnSurface: String = "",
+    var inverseSurface: String = "",
+    var inversePrimary: String = "",
+    var shadow: String = "",
+    var surfaceTint: String = "",
+    var outlineVariant: String = "",
+    var scrim: String = "",
+    var seed: String = ""
 )
 
 data class NavigationElement(
@@ -66,6 +101,8 @@ sealed class UIElement {
     ) : UIElement()
     data class ButtonElement(
         val label: String,
+        val backgroundColor: String,
+        val color: String,
         val link: String) : UIElement()
     data class ImageElement(
         val src: String,
@@ -88,7 +125,10 @@ sealed class UIElement {
         val uiElements: MutableList<UIElement> = mutableListOf()) : UIElement()
     data class MarkdownElement(
         val text: String,
-        val color: String) : UIElement()
+        val color: String,
+        val fontSize: TextUnit,
+        val fontWeight: FontWeight,
+        val textAlign: TextAlign) : UIElement()
 }
 
 data class Padding(val top: Int, val right: Int, val bottom: Int, val left: Int)

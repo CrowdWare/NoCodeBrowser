@@ -1,27 +1,46 @@
 Page {
-  backgroundColor: "#FFFFFF"
-  color: "#ffffFF"
   padding: "8"
 
   Column {
     padding: "8"
 
     Markdown {
-      color: "#4C9BD9"
-      text: "# About the author"
+      text: "# About this app"
     }
 
     Spacer { amount: 8 }
-    Image { src: "olaf.jpg" }
-    Spacer { amount: 8 }
+   
     Markdown {
-      color: "#000000"
-      fontSize: 16
-      text: "Olaf, the founder of CrowdWare and the inventor of NoCode was born 1963 in Hamburg, Germany. 
-                He studied graphics- and 
-																human computer interaction design and he has been working as a software freelance developer for more than 30 years.
+      text: "You can design these kind of apps using the NoCodeDesigner.
+To test such an app you need this browser app." }
+    Spacer {amount: 8}
+    Row {
+						Column {
+							Text {text:"Open the menu (ham-
+burger icon) and 
+select Settings. 
+On the settings page 
+add a link.
+Give the link a unique title, 
+which will later be displayed 
+in the menu below Settings.
+Now enter the the url to you 
+web server."}
+						}
+      Spacer {amount: 8}
+      Image { src: "menu.png" scale:"fit"}
+    }
+    Markdown { text:"
+ This url normally looks similar to
+**http://192.168.178.21:8000/** which is the path to your local web server.
+This url will be displayed when you start your Python based test web server inside your project folder using:
+**python server.py** 
+Now just click on [Add Link] button and the link should be stored.
+When you now open your menu again you should see the newly created menuitem.
 
-The initial idea for this app was to build a new form of ebook with dynamic content like buttons, videos, sound and the like."
+Click this item and your app will be load automatically.
+
+**The user interface for the browser app will disappear until you restart the browser.**"
     }
     Spacer { weight: 1 }
     Button { label: "Back Home" link: "page:home" }
