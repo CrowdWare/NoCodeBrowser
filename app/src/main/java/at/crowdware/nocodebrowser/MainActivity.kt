@@ -97,27 +97,57 @@ class MainActivity : ComponentActivity() {
                 setContent {
                     NoCodeBrowserTheme(app!!.theme) {
                         LocaleManager.init(applicationContext, resources)
-
-                        Scaffold(modifier = Modifier.fillMaxSize()) {  _ ->
-                            val list = mutableListOf(
-                                NavigationItem("app.home", contentLoader.appUrl, Icons.Default.Home, stringResource(R.string.navigation_home)),
-                                NavigationItem("app.about", contentLoader.appUrl, Icons.Default.AccountCircle, stringResource(R.string.navigation_about)),
-                                NavigationItem("app.settings", "", Icons.Default.Settings, stringResource(R.string.settings)),
-                            )
-                            if(contentLoader.links.isNotEmpty())
-                                list.add(NavigationItem("divider"))
-                            for(link in contentLoader.links) {
-                                list.add(NavigationItem(link.titel, link.url, Icons.Default.Star, link.titel))
-                            }
-
-                            // navigation targets which are not listed in the drawer
-                            for (file in app!!.deployment.files) {
-                                if (file.path.endsWith(".sml")) {
-                                    list.add(NavigationItem(file.path.substringBefore(".sml"), contentLoader.appUrl))
+                        if(app!!.id == "at.crowdware.nocodebrowser") {
+                            Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
+                                val list = mutableListOf(
+                                    NavigationItem(
+                                        "app.home",
+                                        contentLoader.appUrl,
+                                        Icons.Default.Home,
+                                        stringResource(R.string.navigation_home)
+                                    ),
+                                    NavigationItem(
+                                        "app.about",
+                                        contentLoader.appUrl,
+                                        Icons.Default.AccountCircle,
+                                        stringResource(R.string.navigation_about)
+                                    ),
+                                    NavigationItem(
+                                        "app.settings",
+                                        "",
+                                        Icons.Default.Settings,
+                                        stringResource(R.string.settings)
+                                    ),
+                                )
+                                if (contentLoader.links.isNotEmpty())
+                                    list.add(NavigationItem("divider"))
+                                for (link in contentLoader.links) {
+                                    list.add(
+                                        NavigationItem(
+                                            "home",
+                                            link.url,
+                                            Icons.Default.Star,
+                                            link.titel
+                                        )
+                                    )
                                 }
-                            }
 
-                            NavigationView(list, context)
+                                // navigation targets which are not listed in the drawer
+                                for (file in app!!.deployment.files) {
+                                    if (file.path.endsWith(".sml")) {
+                                        list.add(
+                                            NavigationItem(
+                                                file.path.substringBefore(".sml"),
+                                                contentLoader.appUrl
+                                            )
+                                        )
+                                    }
+                                }
+
+                                NavigationView(list, context)
+                            }
+                        } else {
+                            
                         }
                     }
                 }

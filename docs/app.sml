@@ -1,7 +1,7 @@
 App {
 	name: "MyApp"
 	icon: "icon.png"
-	id: "at.crowdware.iav"
+	id: "at.crowdware.nocodebrowser"
  smlVersion: "1.1"
 
   Theme {
