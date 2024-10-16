@@ -5,7 +5,7 @@ App {
  smlVersion: "1.1"
 
   Theme {
-    primary: "#FF0c8ce9"
+    primary: "#FF0C8CE9"
     onPrimary: "#FFFFFF"
     primaryContainer: "#FFDDB3"
     onPrimaryContainer: "#291800"

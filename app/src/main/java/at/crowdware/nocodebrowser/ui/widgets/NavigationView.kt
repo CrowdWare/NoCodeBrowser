@@ -79,7 +79,12 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
     val context = LocalContext.current
     val pluginName = remember { mutableStateOf("App") }
 
-    NavHost(navController = navController, startDestination = "home", modifier = Modifier.background(color = navhostBackground.value).systemBarsPadding()) {
+    NavHost(
+        navController = navController,
+        startDestination = "home",
+        modifier = Modifier
+            .background(color = navhostBackground.value)
+            .systemBarsPadding()) {
         for (index in items.indices) {
             composable(items[index].id) {
                 when (items[index].id) {
@@ -111,9 +116,7 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
                             "app.about" -> LoadPage("about", navhostBackground, mainActivity, navController
                             )
                             "app.settings" -> Settings()
-
                             else -> {
-                                //println("about to load page: ${items[index].id} ${items[index].url}")
                                 LoadPage(items[index].id, navhostBackground, mainActivity, navController)
                             }
                         }

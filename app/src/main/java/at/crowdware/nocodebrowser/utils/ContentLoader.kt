@@ -24,6 +24,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import at.crowdware.nocodebrowser.MainActivity
 import at.crowdware.nocodebrowser.parseApp
 import at.crowdware.nocodebrowser.parsePage
 import at.crowdware.nocodebrowser.ui.App
@@ -41,14 +42,14 @@ data class Link(val titel: String, val url: String)
 class ContentLoader {
 
     private lateinit var okHttpClient: OkHttpClient
-    private lateinit var context: Context
+    private lateinit var context: MainActivity
     var app: App? = null
     lateinit var appUrl: String
     private var appLoaded = false
     val links: MutableList<Link> = mutableListOf()
 
     // Initialize the OkHttp client and setup cache directory
-    fun init(ctx: Context) {
+    fun init(ctx: MainActivity) {
         context = ctx
         okHttpClient = OkHttpClient.Builder().build()
 
@@ -115,9 +116,13 @@ class ContentLoader {
             ""
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     suspend fun switchApp(url: String) {
         if(url != appUrl) {
-            loadApp(url+ "/app.sml")
+
+            val app = loadApp(url+ "/app.sml")
+            if(app != null)
+            context.setNewApp(app)
         }
     }
 
