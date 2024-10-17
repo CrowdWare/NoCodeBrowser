@@ -66,10 +66,15 @@ def update():
     app_sml_path = os.path.join(base_path, 'app.sml')
 
     pages_path = os.path.join(base_path, 'pages')
-    assets_path = os.path.join(base_path, 'assets')
+    images_path = os.path.join(base_path, 'images')
+    sounds_path = os.path.join(base_path, 'sounds')
+    videos_path = os.path.join(base_path, 'videos')
 
     deployment_data = generate_deployment_data(pages_path, exclude_files=['.DS_Store'])
-    deployment_data += "\n" + generate_deployment_data(assets_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data(images_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data(sounds_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data(videos_path, exclude_files=['.DS_Store'])
+    
 
     print("Updating app.sml with deployment files...")
     update_deployment(app_sml_path, deployment_data)
