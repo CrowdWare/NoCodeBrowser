@@ -106,14 +106,17 @@ sealed class UIElement {
     data class ImageElement(
         val src: String,
         val scale: String,
+        val weight: Int,
         val link: String) : UIElement()
     data class SpacerElement(
         val amount: Int,
         val weight: Int) : UIElement()
     data class VideoElement(
-        val src: String) : UIElement()
+        val src: String,
+        val weight: Int) : UIElement()
     data class YoutubeElement(
-        val id: String) : UIElement()
+        val id: String,
+        val weight: Int) : UIElement()
     data class SoundElement(
         val src: String) : UIElement()
     data class RowElement(

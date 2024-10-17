@@ -156,16 +156,16 @@ fun RowScope.RenderElement(mainActivity: MainActivity, navController: NavHostCon
             renderButton(mainActivity, navController, element)
         }
         is UIElement.ImageElement -> {
-            dynamicImageFromAssets(mainActivity, navController, element.src, element.scale, element.link)
+            dynamicImageFromAssets(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, mainActivity = mainActivity, navcontroller = navController, filename = element.src, scale = element.scale, link = element.link)
         }
         is UIElement.VideoElement -> {
-            dynamicVideofromAssets(mainActivity, element.src)
+            dynamicVideofromAssets(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, mainActivity = mainActivity, filename = element.src)
         }
         is UIElement.SoundElement -> {
             dynamicSoundfromAssets(mainActivity, element.src)
         }
         is UIElement.YoutubeElement -> {
-            dynamicYoutube(element.id)
+            dynamicYoutube(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, videoId = element.id)
         }
         is UIElement.SpacerElement -> {
             var mod = Modifier as Modifier
@@ -199,16 +199,16 @@ fun ColumnScope.RenderElement(mainActivity: MainActivity, navController: NavHost
             renderButton(mainActivity, navController, element)
         }
         is UIElement.ImageElement -> {
-            dynamicImageFromAssets(mainActivity, navController, filename = element.src, element.scale, element.link)
+            dynamicImageFromAssets(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, mainActivity = mainActivity, navcontroller = navController, filename = element.src, scale =element.scale, link = element.link)
         }
         is UIElement.VideoElement -> {
-            dynamicVideofromAssets(mainActivity, element.src)
+            dynamicVideofromAssets(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, mainActivity = mainActivity, filename = element.src)
         }
         is UIElement.SoundElement -> {
             dynamicSoundfromAssets(mainActivity, element.src)
         }
         is UIElement.YoutubeElement -> {
-            dynamicYoutube(element.id)
+            dynamicYoutube(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, videoId = element.id)
         }
         is UIElement.SpacerElement -> {
             var mod = Modifier as Modifier
@@ -325,16 +325,16 @@ fun RenderElement(
             renderButton(mainActivity, navController, element)
         }
         is UIElement.ImageElement -> {
-            dynamicImageFromAssets(mainActivity, navController, filename = element.src, element.scale, element.link)
+            dynamicImageFromAssets(modifier = Modifier, mainActivity, navcontroller = navController, filename = element.src, scale = element.scale, link= element.link)
         }
         is UIElement.VideoElement -> {
-            dynamicVideofromAssets(mainActivity,element.src)
+            dynamicVideofromAssets(modifier= Modifier, mainActivity = mainActivity,element.src)
         }
         is UIElement.SoundElement -> {
             dynamicSoundfromAssets(mainActivity, element.src)
         }
         is UIElement.YoutubeElement -> {
-            dynamicYoutube(element.id)
+            dynamicYoutube(modifier = Modifier, videoId = element.id)
         }
         else -> {}
     }
@@ -363,7 +363,7 @@ fun handleButtonClick(
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun dynamicImageFromAssets( mainActivity: MainActivity, navcontroller: NavController, filename: String, scale: String, link: String) {
+fun dynamicImageFromAssets(modifier: Modifier = Modifier, mainActivity: MainActivity, navcontroller: NavController, filename: String, scale: String, link: String) {
     var cacheName by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
@@ -387,7 +387,7 @@ fun dynamicImageFromAssets( mainActivity: MainActivity, navcontroller: NavContro
                     "none" -> ContentScale.None
                     else -> ContentScale.Fit
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = modifier.fillMaxWidth()
             )
       } else {
           Text(text = "Image [$filename] not found")
@@ -433,12 +433,15 @@ fun dynamicSoundfromAssets(mainActivity: MainActivity, filename: String) {
 }
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun dynamicVideofromAssets(mainActivity: MainActivity, filename: String) {
+fun dynamicVideofromAssets(modifier: Modifier = Modifier, mainActivity: MainActivity, filename: String) {
     var cacheName by remember { mutableStateOf("") }
-
-    LaunchedEffect(Unit) {
-        cacheName = withContext(Dispatchers.IO) {
-            mainActivity.contentLoader.loadAsset(filename)
+    if(filename.startsWith("http")) {
+        cacheName = filename
+    } else {
+        LaunchedEffect(Unit) {
+            cacheName = withContext(Dispatchers.IO) {
+                mainActivity.contentLoader.loadAsset(filename)
+            }
         }
     }
     if (cacheName.isNotEmpty()) {
@@ -469,17 +472,17 @@ fun dynamicVideofromAssets(mainActivity: MainActivity, filename: String) {
                     player = exoPlayer
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = modifier.fillMaxWidth()
         )
     }
 }
 
 @Composable
-fun dynamicYoutube(videoId: String) {
+fun dynamicYoutube(modifier: Modifier = Modifier, videoId: String) {
     val ctx = LocalContext.current
 
     AndroidView(
+        modifier = modifier,
         factory = {
             var view = YouTubePlayerView(it)
             val fragment = view.addYouTubePlayerListener(

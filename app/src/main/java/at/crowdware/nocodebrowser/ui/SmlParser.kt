@@ -251,7 +251,8 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                         val img = ImageElement(
                             src = (properties["src"] as? PropertyValue.StringValue)?.value ?: "",
                             scale = (properties["scale"] as? PropertyValue.StringValue)?.value ?: "1",
-                            link = (properties["link"] as? PropertyValue.StringValue)?.value ?: ""
+                            link = (properties["link"] as? PropertyValue.StringValue)?.value ?: "",
+                            weight =  (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0
                         )
                         elements.add(img)
                     }
@@ -264,15 +265,15 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                     }
                     "Video" -> {
                         val vid = VideoElement(
-                            src = (properties["src"] as? PropertyValue.StringValue)?.value ?: ""
-                            //height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 100
+                            src = (properties["src"] as? PropertyValue.StringValue)?.value ?: "",
+                            weight =  (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0
                         )
                         elements.add(vid)
                     }
                     "Youtube" -> {
                         val yt = YoutubeElement(
-                            id = (properties["id"] as? PropertyValue.StringValue)?.value ?: ""
-                            //height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 100
+                            id = (properties["id"] as? PropertyValue.StringValue)?.value ?: "",
+                            weight =  (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0
                         )
                         elements.add(yt)
                     }
