@@ -143,7 +143,7 @@ fun extractChildElements(element: Any): List<Any> {
 }
 
 fun deserializePage(parsedResult: List<Any>): Page {
-    val page = Page(color = "", backgroundColor = "", padding = Padding(0, 0, 0, 0), elements = mutableListOf())
+    val page = Page(color = "", backgroundColor = "", padding = Padding(0, 0, 0, 0), "false", elements = mutableListOf())
 
     parsedResult.forEach { tuple ->
         when (tuple) {
@@ -156,6 +156,7 @@ fun deserializePage(parsedResult: List<Any>): Page {
                         page.color = (properties["color"] as? PropertyValue.StringValue)?.value ?: ""
                         page.backgroundColor = (properties["backgroundColor"] as? PropertyValue.StringValue)?.value ?: ""
                         page.padding = parsePadding((properties["padding"] as? PropertyValue.StringValue)?.value ?: "0")
+                        page.scrollable = (properties["scrollable"] as? PropertyValue.StringValue)?.value ?: "false"
                         parseNestedElements(extractChildElements(tuple), page.elements as MutableList<UIElement>)
                     }
                 }

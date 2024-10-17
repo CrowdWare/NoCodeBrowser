@@ -87,6 +87,7 @@ data class Page(
     var color: String,
     var backgroundColor: String,
     var padding: Padding,
+    var scrollable: String,
     val elements: MutableList<UIElement>)
 
 sealed class UIElement {

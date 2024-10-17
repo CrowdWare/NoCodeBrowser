@@ -88,16 +88,16 @@ class ContentLoader {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun loadAsset(name: String): String {
+    suspend fun loadAsset(name: String, subdir: String): String {
         var fileContent: ByteArray? = null
-        val url = "$appUrl/assets/$name"
+        val url = "$appUrl/$subdir/$name"
         if(app == null)
             return ""
         val result = app!!.deployment.files.find { it.path == "$name" }
         if (result == null) {
             return ""
         }
-        val fileName = ("ContentCache/" + appUrl.substringAfter("://") + "/assets/").replace(".", "_").replace(":", "_") + "$name"
+        val fileName = ("ContentCache/" + appUrl.substringAfter("://") + "/$subdir/").replace(".", "_").replace(":", "_") + "$name"
         val file = File(context.filesDir, fileName)
         var ret = true
         if (file.exists()) {

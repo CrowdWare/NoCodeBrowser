@@ -39,6 +39,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.CircularProgressIndicator
@@ -88,9 +90,9 @@ fun LoadPage(
     navController: NavHostController
 ) {
     //val context = LocalContext.current
-    var page:Page? by remember { mutableStateOf(Page(color="#FFFFFF", backgroundColor = "#000000", padding = Padding(0,0,0,0), elements = mutableListOf()))}
+    var page:Page? by remember { mutableStateOf(Page(color="#FFFFFF", backgroundColor = "#000000", padding = Padding(0,0,0,0), "false", elements = mutableListOf()))}
     var isLoading by remember { mutableStateOf(true) }
-
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
         page = withContext(Dispatchers.IO) {
@@ -107,8 +109,12 @@ fun LoadPage(
             val padding = page!!.padding
             val bgColor = page!!.backgroundColor
             navhostBackground.value = hexToColor(bgColor, MaterialTheme.colorScheme.background)
-            Row(
-                modifier = Modifier
+            var modifier = Modifier as Modifier
+            if (page!!.scrollable == "true") {
+                modifier = modifier.verticalScroll(scrollState)
+            }
+            Column(
+                modifier = modifier
                     .padding(
                         start = padding.left.dp,
                         top = padding.top.dp,
@@ -368,7 +374,7 @@ fun dynamicImageFromAssets(modifier: Modifier = Modifier, mainActivity: MainActi
 
     LaunchedEffect(Unit) {
         cacheName = withContext(Dispatchers.IO) {
-            mainActivity.contentLoader.loadAsset(filename)
+            mainActivity.contentLoader.loadAsset(filename, "images")
         }
     }
     if (cacheName.isNotEmpty()) {
@@ -404,7 +410,7 @@ fun dynamicSoundfromAssets(mainActivity: MainActivity, filename: String) {
 
     LaunchedEffect(Unit) {
         cacheName = withContext(Dispatchers.IO) {
-            mainActivity.contentLoader.loadAsset(filename)
+            mainActivity.contentLoader.loadAsset(filename ,"sounds")
         }
     }
     if (cacheName.isNotEmpty()) {
@@ -440,7 +446,7 @@ fun dynamicVideofromAssets(modifier: Modifier = Modifier, mainActivity: MainActi
     } else {
         LaunchedEffect(Unit) {
             cacheName = withContext(Dispatchers.IO) {
-                mainActivity.contentLoader.loadAsset(filename)
+                mainActivity.contentLoader.loadAsset(filename, "videos")
             }
         }
     }
