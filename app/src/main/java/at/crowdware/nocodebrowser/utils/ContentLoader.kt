@@ -200,23 +200,30 @@ class ContentLoader {
         if (file.exists()) {
             fileContent = file.readText()
         }
-        // Download content from the URL
-        var appContent = downloadSml(url)
 
-        if (appContent != null) {
-            if (fileContent != appContent) {
-                // Write new content to the cache if it has changed
-                file.writeText(appContent)
+        if (fileContent.contains("at.crowdware.nocodebrowser")) {
+            // Download content from the URL
+            var appContent = downloadSml(url)
+            if (appContent != null) {
+                if (fileContent != appContent) {
+                    // Write new content to the cache if it has changed
+                    file.writeText(appContent)
+                }
+            } else {
+                // Use cached content if available
+                if (fileContent.isNotEmpty()) {
+                    appContent = fileContent
+                }
+            }
+
+            // Parse the app content
+            if (appContent != null && appContent.isNotEmpty()) {
+                app = parseApp(appContent)
+                appLoaded = true
             }
         } else {
-            // Use cached content if available
-            if (fileContent.isNotEmpty()) {
-                appContent = fileContent
-            }
-        }
-        // Parse the app content
-        if (appContent != null && appContent.isNotEmpty()) {
-            app = parseApp(appContent)
+            // use pre cached version
+            app = parseApp(fileContent)
             appLoaded = true
         }
         return@withContext app

@@ -82,5 +82,5 @@ dependencies {
     implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
 
     // Lua scripting
-    implementation("com.bennyhuo:luajavax:1.0")
+    //implementation("com.bennyhuo:luajavax:1.0")
 }

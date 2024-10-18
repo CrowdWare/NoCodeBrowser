@@ -22,6 +22,7 @@ package at.crowdware.nocodebrowser
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.AssetManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -59,6 +60,7 @@ import at.crowdware.nocodebrowser.utils.ContentLoader
 import at.crowdware.nocodebrowser.view.LoadPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 class MainActivity : ComponentActivity() {
@@ -73,7 +75,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val context = this
 
-
+        installCacheFromAssets()
         contentLoader.init(this)
         lifecycleScope.launch(Dispatchers.Main) {
             // load the dynamic app, we can change the content on the web server
@@ -187,6 +189,64 @@ class MainActivity : ComponentActivity() {
 
     override fun attachBaseContext(newBase: Context?) {
         super.attachBaseContext(LocaleManager.wrapContext(newBase!!))
+    }
+
+    // this technique is used to pre install the app to the cache for faster loads
+    private fun installCacheFromAssets() {
+        val directory = File(this.filesDir, "ContentCache/crowdware_github_io/NoCodeBrowser")
+        var pages: File
+        var images: File
+        var sounds: File
+        var videos: File
+
+        if (directory.exists()) {
+            return // files exists, nothing to do
+        } else {
+            directory.mkdirs()
+            images = File(directory, "images")
+            images.mkdir()
+            sounds = File(directory, "sounds")
+            sounds.mkdir()
+            videos = File(directory, "videos")
+            videos.mkdir()
+            pages = File(directory, "pages")
+            pages.mkdir()
+        }
+
+        try {
+            copyDir("images", images)
+            copyDir("sounds", sounds)
+            copyDir("videos", videos)
+            copyDir("pages", pages)
+            copyDir("", directory)
+
+        } catch(e: Exception) {
+            println("Error in installCacheFromAssets: ${e.message}")
+        }
+    }
+
+    private fun copyDir(source: String, directory: File) {
+        println("copyDir: $source, ${directory.path}")
+        val files = this.assets.list(source)
+        if (files != null) {
+            for (file in files) {
+                println("copy: $source/$file")
+                if (source == "")
+                    copyFile("$file", file, directory)
+                else
+                    copyFile("$source/$file", file, directory)
+            }
+        }
+    }
+
+    private fun copyFile(source: String, target: String, directory: File) {
+        val inputStream = this.assets.open(source)
+        val outFile = File(directory, target)
+        inputStream.use { input ->
+            outFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
     }
 }
 
