@@ -21,8 +21,6 @@ package at.crowdware.nocodebrowser
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
@@ -44,7 +42,6 @@ import at.crowdware.nocodebrowser.ui.UIElement.TextElement
 import at.crowdware.nocodebrowser.ui.UIElement
 import at.crowdware.nocodebrowser.ui.UIElement.VideoElement
 import at.crowdware.nocodebrowser.ui.UIElement.YoutubeElement
-import at.crowdware.nocodebrowser.ui.hexToColor
 import at.crowdware.nocodebrowser.ui.parsePadding
 import com.github.h0tk3y.betterParse.combinators.and
 import com.github.h0tk3y.betterParse.combinators.map
@@ -278,6 +275,13 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                         )
                         elements.add(yt)
                     }
+                    "Godot" -> {
+                        val yt = UIElement.GodotElement(
+                            height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0,
+                            weight = (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0
+                        )
+                        elements.add(yt)
+                    }
                 }
             }
         }
@@ -367,9 +371,10 @@ fun parseNestedDeployElements(nestedElements: List<Any>, deployment: DeploymentE
                     "File" -> {
                         val path = (properties["path"] as? PropertyValue.StringValue)?.value ?: ""
                         val date = (properties["time"] as? PropertyValue.StringValue)?.value ?: ""
+                        val type = (properties["type"] as? PropertyValue.StringValue)?.value ?: ""
                         val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH.mm.ss")
                         val dateTime = LocalDateTime.parse(date, formatter)
-                        deployment.files.add(FileElement(path, dateTime))
+                        deployment.files.add(FileElement(path, dateTime, type))
                     }
                 }
             }

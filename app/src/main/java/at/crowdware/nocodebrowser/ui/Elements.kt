@@ -19,8 +19,6 @@
  ****************************************************************************/
 
 package at.crowdware.nocodebrowser.ui
-import androidx.compose.material3.ColorScheme
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
@@ -78,7 +76,7 @@ data class DeploymentElement(
     val files: MutableList<FileElement> = mutableListOf()
 )
 
-data class FileElement(val path: String, val time: LocalDateTime)
+data class FileElement(val path: String, val time: LocalDateTime, val type: String)
 
 data class ItemElement (val page: String)
 
@@ -132,6 +130,9 @@ sealed class UIElement {
         val fontSize: TextUnit,
         val fontWeight: FontWeight,
         val textAlign: TextAlign) : UIElement()
+    data class GodotElement(
+        val height: Int,
+        val weight: Int) : UIElement()
 }
 
 data class Padding(val top: Int, val right: Int, val bottom: Int, val left: Int)

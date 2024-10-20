@@ -19,6 +19,8 @@
  ****************************************************************************/
 package at.crowdware.nocodebrowser.ui.widgets
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -59,6 +61,7 @@ import kotlinx.coroutines.withContext
 data class NavigationItem( val id: String, val url: String = "", val icon: ImageVector? = null, val text: String = "", val index: Int = 0)
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DrawerSheet(
     drawerState: DrawerState,

@@ -18,6 +18,7 @@
  *
  ****************************************************************************/
 package at.crowdware.nocodebrowser.utils
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Binder
 import android.os.Build
@@ -118,16 +119,17 @@ class ContentLoader {
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun switchApp(url: String) {
+        println("switchApp: from $appUrl to $url")
         if(url != appUrl) {
-
             val app = loadApp(url+ "/app.sml")
             if(app != null)
-            context.setNewApp(app)
+                context.setNewApp(app)
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun loadPage(name: String): Page? {
+        println("loadPage: $name")
         var fileContent = ""
         val url = "$appUrl/pages/$name.sml"
         if (app == null)
@@ -201,7 +203,7 @@ class ContentLoader {
             fileContent = file.readText()
         }
 
-        if (fileContent.contains("at.crowdware.nocodebrowser") || fileContent.isEmpty()) {
+        if (!fileContent.contains("at.crowdware.nocodebrowser") || fileContent.isEmpty()) {
             // Download content from the URL
             var appContent = downloadSml(url)
             if (appContent != null) {
@@ -220,6 +222,34 @@ class ContentLoader {
             if (appContent != null && appContent.isNotEmpty()) {
                 app = parseApp(appContent)
                 appLoaded = true
+            }
+
+            // clear cache
+            val godotCache = File(context.filesDir, "GodotCache")
+            godotCache.deleteRecursively()
+
+            // copy all godot files to GodotCache
+            for (file in app?.deployment?.files!!) {
+                if (file.type == "godot") {
+                    val url = "$appUrl/godot/${file.path}"
+                    val fileName = "ContentCache/" + appUrl.substringAfter("://").replace(".", "_").replace(":", "_") + "/" + file.path
+                    val cacheFile = File(context.filesDir, fileName)
+                    if (cacheFile.exists()) {
+                        val lastModifiedMillis = cacheFile.lastModified()
+                        val lastModifiedDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastModifiedMillis), ZoneId.systemDefault())
+                        if (file.time.isAfter(lastModifiedDateTime)) {
+                            println("download: $fileName")
+                            loadAndCacheAsset(url,fileName, file.time)
+                        }
+                    } else {
+                        println("download: $fileName")
+                        loadAndCacheAsset(url,fileName, file.time)
+                    }
+                    // now copy file to GodotCache
+                    val filePath = file.path.substringAfter("/")
+                    cacheFile.copyTo(File(context.filesDir , "/GodotCache/$filePath"), true)
+                    println("copy file: $filePath")
+                }
             }
         } else {
             // use pre cached version

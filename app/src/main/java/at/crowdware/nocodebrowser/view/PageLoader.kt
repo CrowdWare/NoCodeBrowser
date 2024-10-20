@@ -25,6 +25,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -63,6 +66,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.fragment.app.FragmentActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -75,6 +79,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.Abs
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.godotengine.godot.GodotFragment
 import java.io.File
 import java.io.IOException
 import java.lang.reflect.GenericSignatureFormatError
@@ -173,6 +178,9 @@ fun RowScope.RenderElement(mainActivity: MainActivity, navController: NavHostCon
         is UIElement.YoutubeElement -> {
             dynamicYoutube(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, videoId = element.id)
         }
+        is UIElement.GodotElement -> {
+            dynamicGodot(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, height = element.height)
+        }
         is UIElement.SpacerElement -> {
             var mod = Modifier as Modifier
             if (element.amount > 0)
@@ -215,6 +223,9 @@ fun ColumnScope.RenderElement(mainActivity: MainActivity, navController: NavHost
         }
         is UIElement.YoutubeElement -> {
             dynamicYoutube(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, videoId = element.id)
+        }
+        is UIElement.GodotElement -> {
+            dynamicGodot(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, height = element.height)
         }
         is UIElement.SpacerElement -> {
             var mod = Modifier as Modifier
@@ -341,6 +352,9 @@ fun RenderElement(
         }
         is UIElement.YoutubeElement -> {
             dynamicYoutube(modifier = Modifier, videoId = element.id)
+        }
+        is UIElement.GodotElement -> {
+            dynamicGodot(modifier = Modifier, height = element.height)
         }
         else -> {}
     }
@@ -503,20 +517,39 @@ fun dynamicYoutube(modifier: Modifier = Modifier, videoId: String) {
                 }
             )
             view
-        })
+        }
+    )
+}
+
+@Composable
+fun dynamicGodot(modifier: Modifier = Modifier, height: Int) {
+    val ctx = LocalContext.current as MainActivity
+
+    AndroidView(
+        factory = { context ->
+            FrameLayout(context).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                id = View.generateViewId()
+                ctx.setGodotFragment(GodotFragment())
+                val fragmentTransaction = (context as FragmentActivity).supportFragmentManager.beginTransaction()
+                fragmentTransaction.replace(id, ctx.getGodotFragment()!!)
+                fragmentTransaction.commit()
+            }
+        },
+        modifier = modifier.height(height.dp)
+    )
 }
 
 fun loadBitmapFromAssets(context: Context, filename: String): Bitmap? {
     return try {
-        // Get the file located in context.filesDir
         val file = File(context.filesDir, filename)
-
-        // Check if the file exists
         if (file.exists()) {
-            // Use BitmapFactory to decode the file into a Bitmap
             BitmapFactory.decodeFile(file.absolutePath)
         } else {
-            null // Return null if the file does not exist
+            null
         }
     } catch (e: IOException) {
         e.printStackTrace()
