@@ -26,6 +26,9 @@ import android.content.res.AssetManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -47,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -60,20 +64,46 @@ import at.crowdware.nocodebrowser.utils.ContentLoader
 import at.crowdware.nocodebrowser.view.LoadPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.godotengine.godot.GodotFragment
 import java.io.File
+import org.godotengine.godot.Godot
+import org.godotengine.godot.GodotHost
+import org.godotengine.godot.plugin.GodotPlugin
+import java.io.FileNotFoundException
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.commitNow
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity(), GodotHost {
     val contentLoader = ContentLoader()
     private var app: App? by mutableStateOf(null)
     private var loading by mutableStateOf(false)
     private val url = "https://crowdware.github.io/NoCodeBrowser/app.sml"
+
+    private var godotFragment: GodotFragment? = null
+    internal var appPlugin: AppPlugin? = null
 
     @OptIn(ExperimentalMaterial3Api::class)
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val context = this
+        //godotFragment = GodotFragment()
 
         installCacheFromAssets()
         contentLoader.init(this)
@@ -88,6 +118,10 @@ class MainActivity : ComponentActivity() {
                 setContent {
                     NoCodeBrowserTheme(app!!.theme) {
                         LocaleManager.init(applicationContext, resources)
+
+                        //GodotContent()
+
+
                         if(app!!.id == "at.crowdware.nocodebrowser") {
                             // in the local app we use Scaffold and the navigation drawer
                             Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
@@ -178,6 +212,49 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun getActivity() = this
+
+    override fun getGodot() = godotFragment?.godot
+
+    override fun getHostPlugins(godot: Godot): Set<GodotPlugin> {
+        if (appPlugin == null) {
+            appPlugin = AppPlugin(godot)
+        }
+        return setOf(appPlugin!!)
+    }
+
+    @Composable
+    fun GodotContent() {
+        println("GodotContent")
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Above Gotdot", fontSize = 30.sp)
+            AndroidView(
+                factory = { context ->
+                    FrameLayout(context).apply {
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                        id = View.generateViewId()
+                        godotFragment = GodotFragment()
+                        val fragmentTransaction = (context as FragmentActivity).supportFragmentManager.beginTransaction()
+                        fragmentTransaction.replace(id, godotFragment!!)
+                        fragmentTransaction.commit()
+                    }
+                },
+                modifier = Modifier.height(200.dp)
+            )
+            Button(
+                onClick = {
+                    println("click: $appPlugin")
+                    appPlugin?.showGLTF(      "res://gltfs/food_kit/apple.glb")
+                }) {
+                Text("Load Apple", fontSize = 30.sp)
+            }
+
+        }
+    }
+
     fun setNewApp(ap: App) {
         app = ap
     }
@@ -202,6 +279,11 @@ class MainActivity : ComponentActivity() {
         if (directory.exists()) {
             return // files exists, nothing to do
         } else {
+            try {
+                this.assets.open("NoCodeBrowser/app.sml")
+            } catch(e: Exception) {
+                return // no pre cached data found, so we have to load via internet
+            }
             directory.mkdirs()
             images = File(directory, "images")
             images.mkdir()
@@ -249,26 +331,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-
-/* working LUA sample
-     class Method {
-         fun sayHello(name: String) {
-             println("Method:sayHello(" + name + ") called")
-         }
-     }
-
-     LuaFactory.createLua(this).use { lua ->
-         lua.redirectStdioToLogcat()
-         lua["method"] = Method() // register object
-         lua.runText("print('hello from lua')")
-         lua.runText("method:sayHello('Horst')")
-         lua.runText("""
-         n = 2.0
-         i = 3
-         x = i * n
-     """.trimIndent())
-         val x = lua.getDouble("x")
-         println("x = $x")
-     }
-*/

@@ -8,6 +8,20 @@ android {
     compileSdk = 34
 
     defaultConfig {
+        androidResources {
+            ignoreAssetsPattern += listOf(
+                "!.svn",
+                "!.git",
+                "!.gitignore",
+                "!.ds_store",
+                "!*.scc",
+                "<dir>_*",
+                "!CVS",
+                "!thumbs.db",
+                "!picasa.ini",
+                "!*~"
+            )
+        }
         applicationId = "at.crowdware.nocodebrowser"
         minSdk = 24
         targetSdk = 34
@@ -81,6 +95,9 @@ dependencies {
     // youtube player
     implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
 
-    // Lua scripting
-    //implementation("com.bennyhuo:luajavax:1.0")
+    // godot
+    implementation("com.google.android.material:material:1.10.0")
+    implementation("androidx.fragment:fragment-ktx:1.6.1")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("org.godotengine:godot:4.3.0.stable")
 }
