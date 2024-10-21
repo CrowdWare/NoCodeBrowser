@@ -10,26 +10,23 @@ config_version=5
 
 [application]
 
-config/name="GLTF Viewer"
-run/main_scene="user://GodotCache/main.tscn"
-config/features=PackedStringArray("4.3", "GL Compatibility")
+config/name="Demo"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.3", "Mobile")
 config/icon="res://icon.svg"
-
-[debug]
-
-settings/stdout/verbose_stdout=true
-gdscript/warnings/untyped_declaration=2
 
 [display]
 
-window/handheld/orientation=6
+window/handheld/orientation=1
 
-[input_devices]
+[file_customization]
 
-pointing/android/enable_pan_and_scale_gestures=true
+folder_colors={
+"res://objects/": "purple"
+}
 
 [rendering]
 
+rendering_device/fallback_to_vulkan=false
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-textures/vram_compression/import_etc2_astc=true

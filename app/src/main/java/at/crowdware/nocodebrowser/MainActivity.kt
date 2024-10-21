@@ -25,29 +25,20 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.View
-import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,10 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -80,7 +68,7 @@ import org.godotengine.godot.plugin.GodotPlugin
 import java.io.File
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-class MainActivity : FragmentActivity(), GodotHost {
+class MainActivity : AppCompatActivity(), GodotHost {
     val contentLoader = ContentLoader()
     private var app: App? by mutableStateOf(null)
     private var loading by mutableStateOf(false)
@@ -89,14 +77,15 @@ class MainActivity : FragmentActivity(), GodotHost {
     private var godotFragment: GodotFragment? = null
     internal var appPlugin: AppPlugin? = null
 
-    @OptIn(ExperimentalMaterial3Api::class)
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val context = this
-        //godotFragment = GodotFragment()
+        godotFragment = GodotFragment()
 
         installCacheFromAssets()
+
         contentLoader.init(this)
         lifecycleScope.launch(Dispatchers.Main) {
             // load the dynamic app, we can change the content on the web server
@@ -110,7 +99,7 @@ class MainActivity : FragmentActivity(), GodotHost {
                     NoCodeBrowserTheme(app!!.theme) {
                         LocaleManager.init(applicationContext, resources)
 
-                        //GodotContent()
+
                         if(app!!.id == "at.crowdware.nocodebrowser") {
                             // in the local app we use Scaffold and the navigation drawer
                             Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
@@ -201,58 +190,27 @@ class MainActivity : FragmentActivity(), GodotHost {
         }
     }
 
+    private fun initAppPluginIfNeeded(godot: Godot) {
+        if (appPlugin == null) {
+            appPlugin = AppPlugin(godot)
+        }
+    }
+
+
     override fun getActivity() = this
 
     override fun getGodot() = godotFragment?.godot
 
     fun getGodotFragment(): GodotFragment? {
-        return godotFragment
-    }
-
-    fun setGodotFragment(gf: GodotFragment?) {
-        godotFragment = gf
+        if (godotFragment == null) {
+            godotFragment = GodotFragment()
+        }
+        return godotFragment!!
     }
 
     override fun getHostPlugins(godot: Godot): Set<GodotPlugin> {
-        if (appPlugin == null) {
-            appPlugin = AppPlugin(godot)
-        }
+        initAppPluginIfNeeded(godot)
         return setOf(appPlugin!!)
-    }
-
-    @Composable
-    fun GodotContent() {
-        println("GodotContent")
-        Column(modifier = Modifier.padding(16.dp)) {
-            Spacer(modifier=Modifier.height(38.dp))
-            Text("Godot Plugin", fontSize = 30.sp)
-            Spacer(modifier=Modifier.height(8.dp))
-            AndroidView(
-                factory = { context ->
-                    FrameLayout(context).apply {
-                        layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT
-                        )
-                        id = View.generateViewId()
-                        godotFragment = GodotFragment()
-                        val fragmentTransaction = (context as FragmentActivity).supportFragmentManager.beginTransaction()
-                        fragmentTransaction.replace(id, godotFragment!!)
-                        fragmentTransaction.commit()
-                    }
-                },
-                modifier = Modifier.height(200.dp)
-            )
-            Spacer(modifier=Modifier.height(8.dp))
-            Button(modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    println("click: $appPlugin")
-                    appPlugin?.showGLTF(      "user://ContentCache/crowdware_github_io/NoCodeBrowser/gltfs/apple.glb")
-                }) {
-                Text("Load Apple", fontSize = 30.sp)
-            }
-
-        }
     }
 
     fun setNewApp(ap: App) {

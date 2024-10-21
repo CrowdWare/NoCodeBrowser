@@ -11,11 +11,12 @@ class AppPlugin(godot: Godot) : GodotPlugin(godot) {
 
     companion object {
         val SHOW_GLTF_SIGNAL = SignalInfo("show_gltf", String::class.java)
+        val LOAD_SCENE_SIGNAL = SignalInfo("load_scene", String::class.java)
     }
 
     override fun getPluginName() = "AppPlugin"
 
-    override fun getPluginSignals() = setOf(SHOW_GLTF_SIGNAL)
+    override fun getPluginSignals() = setOf(SHOW_GLTF_SIGNAL, LOAD_SCENE_SIGNAL)
 
     /**
      * Used to emit a signal to the gdscript logic to update the gltf being shown.
@@ -24,5 +25,10 @@ class AppPlugin(godot: Godot) : GodotPlugin(godot) {
      */
     internal fun showGLTF(glbFilepath: String) {
         emitSignal(SHOW_GLTF_SIGNAL.name, glbFilepath)
+    }
+
+    internal fun loadScene(scenePath: String) {
+        println("loadScene $scenePath")
+        emitSignal(LOAD_SCENE_SIGNAL.name, scenePath)
     }
 }

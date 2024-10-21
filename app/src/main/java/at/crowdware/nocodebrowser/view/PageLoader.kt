@@ -73,17 +73,18 @@ import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import at.crowdware.nocodebrowser.MainActivity
-import at.crowdware.nocodebrowser.ui.*
+import at.crowdware.nocodebrowser.ui.Padding
+import at.crowdware.nocodebrowser.ui.Page
+import at.crowdware.nocodebrowser.ui.UIElement
+import at.crowdware.nocodebrowser.ui.hexToColor
+import at.crowdware.nocodebrowser.ui.parseMarkdown
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.godotengine.godot.GodotFragment
 import java.io.File
 import java.io.IOException
-import java.lang.reflect.GenericSignatureFormatError
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -94,7 +95,6 @@ fun LoadPage(
     mainActivity: MainActivity,
     navController: NavHostController
 ) {
-    //val context = LocalContext.current
     var page:Page? by remember { mutableStateOf(Page(color="#FFFFFF", backgroundColor = "#000000", padding = Padding(0,0,0,0), "false", elements = mutableListOf()))}
     var isLoading by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
@@ -521,28 +521,6 @@ fun dynamicYoutube(modifier: Modifier = Modifier, videoId: String) {
     )
 }
 
-@Composable
-fun dynamicGodot(modifier: Modifier = Modifier, height: Int) {
-    val ctx = LocalContext.current as MainActivity
-
-    AndroidView(
-        factory = { context ->
-            FrameLayout(context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                id = View.generateViewId()
-                ctx.setGodotFragment(GodotFragment())
-                val fragmentTransaction = (context as FragmentActivity).supportFragmentManager.beginTransaction()
-                fragmentTransaction.replace(id, ctx.getGodotFragment()!!)
-                fragmentTransaction.commit()
-            }
-        },
-        modifier = modifier.height(height.dp)
-    )
-}
-
 fun loadBitmapFromAssets(context: Context, filename: String): Bitmap? {
     return try {
         val file = File(context.filesDir, filename)
@@ -555,4 +533,35 @@ fun loadBitmapFromAssets(context: Context, filename: String): Bitmap? {
         e.printStackTrace()
         null
     }
+}
+
+@Composable
+fun dynamicGodot(modifier: Modifier = Modifier, height: Int) {
+    val ctx = LocalContext.current as MainActivity
+    AndroidView(
+        factory = { context ->
+            FrameLayout(context).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                id = View.generateViewId()
+
+                val fragmentManager = (context as FragmentActivity).supportFragmentManager
+                val godotFragment = fragmentManager.findFragmentByTag("GODOT_FRAGMENT")
+
+                if (godotFragment == null) {
+                    // Create a new instance only if one doesn't exist
+                    val newGodotFragment = ctx.getGodotFragment()
+                    val fragmentTransaction = fragmentManager.beginTransaction()
+                    if (newGodotFragment != null) {
+                        fragmentTransaction.add(id, newGodotFragment, "GODOT_FRAGMENT")
+                    }
+                    fragmentTransaction.commit()
+                }
+            }
+        },
+        modifier = modifier.height(height.dp)
+    )
+
 }
