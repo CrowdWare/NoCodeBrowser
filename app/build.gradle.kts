@@ -23,7 +23,7 @@ android {
             )
         }
         applicationId = "at.crowdware.nocodebrowser"
-        minSdk = 24
+        minSdk = 29
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -95,9 +95,17 @@ dependencies {
     // youtube player
     implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
 
+    // korge
+    //implementation("com.soywiz.korge:korge:6.0.0")
+
     // godot
     implementation("com.google.android.material:material:1.10.0")
-    implementation("androidx.fragment:fragment-ktx:1.6.1")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("org.godotengine:godot:4.3.0.stable")
+    //implementation("androidx.fragment:fragment-ktx:1.6.1")
+    //implementation("androidx.appcompat:appcompat:1.6.1")
+    //implementation("org.godotengine:godot:4.3.0.stable")
+
+    // filament
+    implementation("com.google.android.filament:filament-android:1.54.5")
+    implementation("com.google.android.filament:filament-utils-android:1.54.5")
+    implementation("com.google.android.filament:gltfio-android:1.54.5")
 }

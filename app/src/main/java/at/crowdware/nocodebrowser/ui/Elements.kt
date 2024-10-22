@@ -101,7 +101,10 @@ sealed class UIElement {
         val label: String,
         val backgroundColor: String,
         val color: String,
-        val link: String) : UIElement()
+        val link: String,
+        val weight: Int,
+        val width: Int,
+        val height: Int) : UIElement()
     data class ImageElement(
         val src: String,
         val scale: String,
@@ -130,9 +133,15 @@ sealed class UIElement {
         val fontSize: TextUnit,
         val fontWeight: FontWeight,
         val textAlign: TextAlign) : UIElement()
-    data class GodotElement(
+    data class SceneElement(
+        val weight: Int,
+        val width: Int,
         val height: Int,
-        val weight: Int) : UIElement()
+        val glb: String,
+        val gltf: String,
+        val ibl: String,
+        val skybox: String
+    ) : UIElement()
 }
 
 data class Padding(val top: Int, val right: Int, val bottom: Int, val left: Int)

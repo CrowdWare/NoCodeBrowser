@@ -237,7 +237,10 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                             label = (properties["label"] as? PropertyValue.StringValue)?.value ?: "",
                             link = (properties["link"] as? PropertyValue.StringValue)?.value ?: "",
                             color = (properties["color"] as? PropertyValue.StringValue)?.value ?: "",
-                            backgroundColor = (properties["backgroundColor"] as? PropertyValue.StringValue)?.value ?: ""
+                            backgroundColor = (properties["backgroundColor"] as? PropertyValue.StringValue)?.value ?: "",
+                            weight = (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0,
+                            width = (properties["width"] as? PropertyValue.IntValue)?.value ?: 0,
+                            height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0,
                         )
                         elements.add(btn)
                     }
@@ -275,10 +278,15 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                         )
                         elements.add(yt)
                     }
-                    "Godot" -> {
-                        val yt = UIElement.GodotElement(
+                    "Scene" -> {
+                        val yt = UIElement.SceneElement(
+                            width = (properties["width"] as? PropertyValue.IntValue)?.value ?: 0,
                             height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0,
-                            weight = (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0
+                            weight = (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0,
+                            gltf = (properties["gltf"] as? PropertyValue.StringValue)?.value ?: "",
+                            glb = (properties["glb"] as? PropertyValue.StringValue)?.value ?: "",
+                            skybox = (properties["skybox"] as? PropertyValue.StringValue)?.value ?: "",
+                            ibl = (properties["ibl"] as? PropertyValue.StringValue)?.value ?: "",
                         )
                         elements.add(yt)
                     }

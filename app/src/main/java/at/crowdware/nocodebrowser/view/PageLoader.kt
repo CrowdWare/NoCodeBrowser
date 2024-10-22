@@ -25,12 +25,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
-import android.view.View
-import android.view.ViewGroup
-import android.widget.FrameLayout
+import android.view.SurfaceView
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -66,7 +65,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.fragment.app.FragmentActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -78,6 +76,7 @@ import at.crowdware.nocodebrowser.ui.Page
 import at.crowdware.nocodebrowser.ui.UIElement
 import at.crowdware.nocodebrowser.ui.hexToColor
 import at.crowdware.nocodebrowser.ui.parseMarkdown
+import com.google.android.filament.utils.ModelViewer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
@@ -164,13 +163,13 @@ fun RowScope.RenderElement(mainActivity: MainActivity, navController: NavHostCon
             renderMarkdown(element)
         }
         is UIElement.ButtonElement -> {
-            renderButton(mainActivity, navController, element)
+            renderButton(          modifier = if(element.weight > 0) Modifier.weight(element.weight.toFloat()) else Modifier, mainActivity = mainActivity, navController = navController, element = element)
         }
         is UIElement.ImageElement -> {
-            dynamicImageFromAssets(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, mainActivity = mainActivity, navcontroller = navController, filename = element.src, scale = element.scale, link = element.link)
+            dynamicImageFromAssets(modifier = if(element.weight > 0) Modifier.weight(element.weight.toFloat()) else Modifier, mainActivity = mainActivity, navcontroller = navController, filename = element.src, scale = element.scale, link = element.link)
         }
         is UIElement.VideoElement -> {
-            dynamicVideofromAssets(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, mainActivity = mainActivity, filename = element.src)
+            dynamicVideofromAssets(modifier = if(element.weight > 0) Modifier.weight(element.weight.toFloat()) else Modifier, mainActivity = mainActivity, filename = element.src)
         }
         is UIElement.SoundElement -> {
             dynamicSoundfromAssets(mainActivity, element.src)
@@ -178,8 +177,8 @@ fun RowScope.RenderElement(mainActivity: MainActivity, navController: NavHostCon
         is UIElement.YoutubeElement -> {
             dynamicYoutube(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, videoId = element.id)
         }
-        is UIElement.GodotElement -> {
-            dynamicGodot(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, height = element.height)
+        is UIElement.SceneElement -> {
+            dynamicGodot(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, element)
         }
         is UIElement.SpacerElement -> {
             var mod = Modifier as Modifier
@@ -210,7 +209,7 @@ fun ColumnScope.RenderElement(mainActivity: MainActivity, navController: NavHost
             renderMarkdown(element)
         }
         is UIElement.ButtonElement -> {
-            renderButton(mainActivity, navController, element)
+            renderButton(modifier= Modifier, element = element, mainActivity = mainActivity, navController = navController)
         }
         is UIElement.ImageElement -> {
             dynamicImageFromAssets(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, mainActivity = mainActivity, navcontroller = navController, filename = element.src, scale =element.scale, link = element.link)
@@ -224,8 +223,8 @@ fun ColumnScope.RenderElement(mainActivity: MainActivity, navController: NavHost
         is UIElement.YoutubeElement -> {
             dynamicYoutube(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, videoId = element.id)
         }
-        is UIElement.GodotElement -> {
-            dynamicGodot(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, height = element.height)
+        is UIElement.SceneElement -> {
+            dynamicGodot(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, element)
         }
         is UIElement.SpacerElement -> {
             var mod = Modifier as Modifier
@@ -257,7 +256,8 @@ fun renderColumn(mainActivity: MainActivity, navcontroller: NavHostController, e
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun renderRow(mainActivity: MainActivity, navController: NavHostController, element: UIElement.RowElement) {
-    Row (modifier = Modifier.padding(
+    Row (horizontalArrangement = Arrangement.SpaceEvenly,
+        modifier = Modifier.padding(
         top = element.padding.top.dp,
         bottom = element.padding.bottom.dp,
         start = element.padding.left.dp,
@@ -297,7 +297,12 @@ fun renderMarkdown(element: UIElement.MarkdownElement) {
 }
 
 @Composable
-fun renderButton(mainActivity: MainActivity, navController: NavHostController, element: UIElement.ButtonElement) {
+fun renderButton(
+    modifier: Modifier = Modifier,
+    element: UIElement.ButtonElement,
+    mainActivity: MainActivity,
+    navController: NavHostController
+) {
     var colors = buttonColors()
 
     if(element.color.isNotEmpty() && element.backgroundColor.isNotEmpty())
@@ -311,7 +316,10 @@ fun renderButton(mainActivity: MainActivity, navController: NavHostController, e
             containerColor = hexToColor(element.backgroundColor, Color.Unspecified))
 
     Button(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .then(if(element.width > 0)Modifier.width(element.width.dp)else Modifier)
+            .then(if(element.height > 0)Modifier.height(element.height.dp)else Modifier),
         colors = colors,
         onClick =  { handleButtonClick(element.link, mainActivity, navController) }) {
         Text(text = element.label)
@@ -339,7 +347,7 @@ fun RenderElement(
            renderMarkdown(element)
         }
         is UIElement.ButtonElement -> {
-            renderButton(mainActivity, navController, element)
+            renderButton(modifier = Modifier, element = element, mainActivity = mainActivity, navController= navController)
         }
         is UIElement.ImageElement -> {
             dynamicImageFromAssets(modifier = Modifier, mainActivity, navcontroller = navController, filename = element.src, scale = element.scale, link= element.link)
@@ -353,8 +361,8 @@ fun RenderElement(
         is UIElement.YoutubeElement -> {
             dynamicYoutube(modifier = Modifier, videoId = element.id)
         }
-        is UIElement.GodotElement -> {
-            dynamicGodot(modifier = Modifier, height = element.height)
+        is UIElement.SceneElement -> {
+            dynamicGodot(modifier = Modifier, element = element)
         }
         else -> {}
     }
@@ -373,6 +381,10 @@ fun handleButtonClick(
         link.startsWith("web:") -> {
             val url = link.removePrefix("web:")
             mainActivity.openWebPage(url)
+        }
+        link.startsWith("animation:") -> {
+            val aniType = link.removePrefix("animation:")
+            mainActivity.sendToAnimation(aniType)
         }
         else -> {
             println("Unknown link type: $link")
@@ -453,7 +465,7 @@ fun dynamicSoundfromAssets(mainActivity: MainActivity, filename: String) {
 }
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun dynamicVideofromAssets(modifier: Modifier = Modifier, mainActivity: MainActivity, filename: String) {
+fun dynamicVideofromAssets(modifier: Modifier = Modifier, mainActivity: MainActivity, filename: String, height: Int = 200) {
     var cacheName by remember { mutableStateOf("") }
     if(filename.startsWith("http")) {
         cacheName = filename
@@ -492,17 +504,17 @@ fun dynamicVideofromAssets(modifier: Modifier = Modifier, mainActivity: MainActi
                     player = exoPlayer
                 }
             },
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth().height(height.dp)
         )
     }
 }
 
 @Composable
-fun dynamicYoutube(modifier: Modifier = Modifier, videoId: String) {
+fun dynamicYoutube(modifier: Modifier = Modifier, videoId: String, height: Int = 200) {
     val ctx = LocalContext.current
 
     AndroidView(
-        modifier = modifier,
+        modifier = modifier.height(height.dp),
         factory = {
             var view = YouTubePlayerView(it)
             val fragment = view.addYouTubePlayerListener(
@@ -536,32 +548,31 @@ fun loadBitmapFromAssets(context: Context, filename: String): Bitmap? {
 }
 
 @Composable
-fun dynamicGodot(modifier: Modifier = Modifier, height: Int) {
+fun dynamicGodot(modifier: Modifier = Modifier, element: UIElement.SceneElement) {
     val ctx = LocalContext.current as MainActivity
+
     AndroidView(
         factory = { context ->
-            FrameLayout(context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                id = View.generateViewId()
-
-                val fragmentManager = (context as FragmentActivity).supportFragmentManager
-                val godotFragment = fragmentManager.findFragmentByTag("GODOT_FRAGMENT")
-
-                if (godotFragment == null) {
-                    // Create a new instance only if one doesn't exist
-                    val newGodotFragment = ctx.getGodotFragment()
-                    val fragmentTransaction = fragmentManager.beginTransaction()
-                    if (newGodotFragment != null) {
-                        fragmentTransaction.add(id, newGodotFragment, "GODOT_FRAGMENT")
-                    }
-                    fragmentTransaction.commit()
-                }
+            SurfaceView(context).apply {
+                ctx.modelViewer = ModelViewer(this)
+                setOnTouchListener(ctx.modelViewer)
+                ctx.loadGltf(element.gltf)
+                ctx.loadIbl(element.ibl)
+                ctx.loadSkybox(element.skybox)
+                //onModelLoaded()
+                ctx.choreographer.postFrameCallback(ctx.frameCallback)
             }
         },
-        modifier = modifier.height(height.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .then(if(element.width>0)Modifier.width(element.width.dp)else Modifier)
+            .then(if(element.height>0)Modifier.height(element.height.dp)else Modifier)
     )
 
+    DisposableEffect(Unit) {
+        onDispose {
+            // Remove the frame callback when the composable is disposed
+            ctx.choreographer.removeFrameCallback(ctx.frameCallback)
+        }
+    }
 }

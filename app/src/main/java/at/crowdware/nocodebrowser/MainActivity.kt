@@ -25,10 +25,13 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.Choreographer
+import android.view.SurfaceView
+import android.view.View
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -37,9 +40,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,7 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -59,30 +59,62 @@ import at.crowdware.nocodebrowser.ui.widgets.NavigationItem
 import at.crowdware.nocodebrowser.ui.widgets.NavigationView
 import at.crowdware.nocodebrowser.utils.ContentLoader
 import at.crowdware.nocodebrowser.view.LoadPage
+import com.google.android.filament.utils.KTX1Loader
+import com.google.android.filament.utils.ModelViewer
+import com.google.android.filament.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.godotengine.godot.Godot
-import org.godotengine.godot.GodotFragment
-import org.godotengine.godot.GodotHost
-import org.godotengine.godot.plugin.GodotPlugin
 import java.io.File
+import java.nio.ByteBuffer
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-class MainActivity : AppCompatActivity(), GodotHost {
+class MainActivity : ComponentActivity() {
     val contentLoader = ContentLoader()
     private var app: App? by mutableStateOf(null)
     private var loading by mutableStateOf(false)
     private val url = "https://crowdware.github.io/NoCodeBrowser/app.sml"
+    var cameraDistance: Float = 0F
 
-    private var godotFragment: GodotFragment? = null
-    internal var appPlugin: AppPlugin? = null
+    companion object {
+        init { Utils.init() }
+    }
 
+    lateinit var choreographer: Choreographer
+    lateinit var modelViewer: ModelViewer
+    lateinit var frameCallback: Choreographer.FrameCallback
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val context = this
-        godotFragment = GodotFragment()
+        window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // Hide the navigation bar
+                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY // Allows bringing the navbar back with a swipe
+                )
+
+        choreographer = Choreographer.getInstance()
+        val surfaceView = SurfaceView(this)
+        modelViewer = ModelViewer(surfaceView)
+        cameraDistance = modelViewer.cameraFocalLength
+
+        // Set up the frame callback with your custom logic
+        frameCallback = object : Choreographer.FrameCallback {
+            private val startTime = System.nanoTime()
+            override fun doFrame(currentTime: Long) {
+                val seconds = (currentTime - startTime).toDouble() / 1_000_000_000
+                choreographer.postFrameCallback(this)
+
+                // Handle animation and rendering logic
+                modelViewer.animator?.apply {
+                    if (animationCount > 0) {
+                        applyAnimation(0, seconds.toFloat())
+                    }
+                    updateBoneMatrices()
+                }
+                modelViewer.render(currentTime)
+            }
+        }
+
 
         installCacheFromAssets()
 
@@ -190,27 +222,73 @@ class MainActivity : AppCompatActivity(), GodotHost {
         }
     }
 
-    private fun initAppPluginIfNeeded(godot: Godot) {
-        if (appPlugin == null) {
-            appPlugin = AppPlugin(godot)
+    fun loadIbl(ibl: String) {
+        // Create the indirect light source and add it to the scene.
+        var buffer = readAsset("envs/${ibl}.ktx")
+        KTX1Loader.createIndirectLight(modelViewer.engine, buffer).apply {
+            intensity = 50_000f
+            modelViewer.scene.indirectLight = this
         }
     }
 
-
-    override fun getActivity() = this
-
-    override fun getGodot() = godotFragment?.godot
-
-    fun getGodotFragment(): GodotFragment? {
-        if (godotFragment == null) {
-            godotFragment = GodotFragment()
+    fun loadSkybox(skybox: String) {
+        // Create the sky box and add it to the scene.
+        var buffer = readAsset("envs/${skybox}.ktx")
+        KTX1Loader.createSkybox(modelViewer.engine, buffer).apply {
+            modelViewer.scene.skybox = this
         }
-        return godotFragment!!
     }
 
-    override fun getHostPlugins(godot: Godot): Set<GodotPlugin> {
-        initAppPluginIfNeeded(godot)
-        return setOf(appPlugin!!)
+    fun loadGlb(name: String) {
+        val buffer = readAsset("models/${name}.glb")
+        modelViewer.loadModelGlb(buffer)
+        modelViewer.transformToUnitCube()
+    }
+
+    fun loadGltf(name: String) {
+        val buffer = readAsset("models/${name}.gltf")
+        modelViewer.loadModelGltf(buffer) { uri -> readAsset("models/$uri") }
+        modelViewer.transformToUnitCube()
+    }
+
+    fun zoomCamera(distance: Float) {
+        // Ensure the distance is within reasonable bounds
+        modelViewer.cameraFocalLength = distance
+        /*val adjustedDistance = distance.coerceIn(1.0, 100.0)  // Example limits
+        val camera = modelViewer.camera
+
+        camera.lookAt(
+            /* eyeX = */ 0.0, 0.0, adjustedDistance,  // Adjust the distance
+            /* centerX = */ 0.0, 0.0, 0.0,  // Keep camera pointed at the origin
+            /* upX = */ 0.0, 1.0, 0.0  // Keep up vector aligned with Y axis
+        )
+
+        // Force re-render after the camera adjustment
+        modelViewer.render(System.nanoTime()) // Ensure scene renders with updated camera
+        */
+
+    }
+
+    private fun readAsset(assetName: String): ByteBuffer {
+        val input = assets.open(assetName)
+        val bytes = ByteArray(input.available())
+        input.read(bytes)
+        return ByteBuffer.wrap(bytes)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        choreographer.postFrameCallback(frameCallback)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        choreographer.removeFrameCallback(frameCallback)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        choreographer.removeFrameCallback(frameCallback)
     }
 
     fun setNewApp(ap: App) {
@@ -220,6 +298,18 @@ class MainActivity : AppCompatActivity(), GodotHost {
     fun openWebPage( url: String) {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         startActivity(browserIntent)
+    }
+
+    fun sendToAnimation(cmd: String) {
+        if (cmd == "zoomin") {
+            cameraDistance += 1.0F
+            zoomCamera(cameraDistance)
+            println("zoomin: ${cameraDistance}")
+        }
+        else if(cmd == "zoomout") {
+            cameraDistance -= 1.0F
+            zoomCamera(cameraDistance)
+        }
     }
 
     override fun attachBaseContext(newBase: Context?) {
