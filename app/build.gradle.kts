@@ -80,7 +80,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
+    implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.navigation:navigation-compose:2.6.0")
     // rest client
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
@@ -95,16 +95,7 @@ dependencies {
     // youtube player
     implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
 
-    // korge
-    //implementation("com.soywiz.korge:korge:6.0.0")
-
-    // godot
-    implementation("com.google.android.material:material:1.10.0")
-    //implementation("androidx.fragment:fragment-ktx:1.6.1")
-    //implementation("androidx.appcompat:appcompat:1.6.1")
-    //implementation("org.godotengine:godot:4.3.0.stable")
-
-    // filament
+    // filament 3D
     implementation("com.google.android.filament:filament-android:1.54.5")
     implementation("com.google.android.filament:filament-utils-android:1.54.5")
     implementation("com.google.android.filament:gltfio-android:1.54.5")

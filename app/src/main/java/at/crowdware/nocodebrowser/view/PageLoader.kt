@@ -25,6 +25,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
+import android.view.Choreographer
 import android.view.SurfaceView
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -76,6 +77,7 @@ import at.crowdware.nocodebrowser.ui.Page
 import at.crowdware.nocodebrowser.ui.UIElement
 import at.crowdware.nocodebrowser.ui.hexToColor
 import at.crowdware.nocodebrowser.ui.parseMarkdown
+import com.google.android.filament.utils.KTX1Loader
 import com.google.android.filament.utils.ModelViewer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
@@ -84,6 +86,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
+import java.nio.ByteBuffer
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -178,7 +181,7 @@ fun RowScope.RenderElement(mainActivity: MainActivity, navController: NavHostCon
             dynamicYoutube(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, videoId = element.id)
         }
         is UIElement.SceneElement -> {
-            dynamicGodot(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, element)
+            dynamicScene(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, element)
         }
         is UIElement.SpacerElement -> {
             var mod = Modifier as Modifier
@@ -224,7 +227,7 @@ fun ColumnScope.RenderElement(mainActivity: MainActivity, navController: NavHost
             dynamicYoutube(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, videoId = element.id)
         }
         is UIElement.SceneElement -> {
-            dynamicGodot(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, element)
+            dynamicScene(modifier = if(element.weight > 0){Modifier.weight(element.weight.toFloat())} else {Modifier}, element)
         }
         is UIElement.SpacerElement -> {
             var mod = Modifier as Modifier
@@ -362,7 +365,7 @@ fun RenderElement(
             dynamicYoutube(modifier = Modifier, videoId = element.id)
         }
         is UIElement.SceneElement -> {
-            dynamicGodot(modifier = Modifier, element = element)
+            dynamicScene(modifier = Modifier, element = element)
         }
         else -> {}
     }
@@ -547,8 +550,9 @@ fun loadBitmapFromAssets(context: Context, filename: String): Bitmap? {
     }
 }
 
+/*
 @Composable
-fun dynamicGodot(modifier: Modifier = Modifier, element: UIElement.SceneElement) {
+fun dynamicScene(modifier: Modifier = Modifier, element: UIElement.SceneElement) {
     val ctx = LocalContext.current as MainActivity
 
     AndroidView(
@@ -575,4 +579,79 @@ fun dynamicGodot(modifier: Modifier = Modifier, element: UIElement.SceneElement)
             ctx.choreographer.removeFrameCallback(ctx.frameCallback)
         }
     }
+}
+*/
+
+@Composable
+fun dynamicScene(modifier: Modifier = Modifier, element: UIElement.SceneElement) {
+    val context = LocalContext.current
+    val surfaceView = remember { SurfaceView(context) }
+    val modelViewer = remember(element.model, element.ibl, element.skybox) {
+        ModelViewer(surfaceView).apply {
+            try {
+                val buffer = readAsset("models/${element.model}", context)
+                if (element.model.endsWith(".gltf"))
+                    loadModelGltf(buffer) { uri -> readAsset("$uri", context) }
+                else
+                    loadModelGlb(buffer)
+                transformToUnitCube()
+
+                val bufferIbl = readAsset("models/${element.ibl}", context)
+                KTX1Loader.createIndirectLight(engine, bufferIbl).apply {
+                    intensity = 50_000f
+                    scene.indirectLight = this
+                }
+
+                val bufferSkybox = readAsset("models/${element.skybox}", context)
+                KTX1Loader.createSkybox(engine, bufferSkybox).apply {
+                    scene.skybox = this
+                }
+
+                surfaceView.setOnTouchListener(this)
+            } catch(e: Exception) {
+                println("Error in dynamic scene: ${e.message}")
+            }
+        }
+    }
+    AndroidView(
+        factory = { surfaceView },
+        modifier = modifier
+            .fillMaxWidth()
+            .then(if (element.width > 0) Modifier.width(element.width.dp) else Modifier)
+            .then(if (element.height > 0) Modifier.height(element.height.dp) else Modifier)
+    )
+    val choreographer = remember { Choreographer.getInstance() }
+    val startTime = remember { System.nanoTime() }
+    val frameCallback = remember {
+        object : Choreographer.FrameCallback {
+            override fun doFrame(currentTime: Long) {
+                // Berechne die vergangene Zeit in Sekunden
+                val seconds = (currentTime - startTime).toDouble() / 1_000_000_000
+                choreographer.postFrameCallback(this)
+
+                // Handle animation and rendering logic
+                modelViewer.animator?.apply {
+                    if (animationCount > 0) {
+                        applyAnimation(0, seconds.toFloat())
+                    }
+                    updateBoneMatrices()
+                }
+                modelViewer.render(currentTime)
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        choreographer.postFrameCallback(frameCallback)
+        onDispose {
+            choreographer.removeFrameCallback(frameCallback)
+        }
+    }
+}
+
+fun readAsset(assetName: String, context: Context): ByteBuffer {
+    val input = context.assets.open(assetName)
+    val bytes = ByteArray(input.available())
+    input.read(bytes)
+    return ByteBuffer.wrap(bytes)
 }

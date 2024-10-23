@@ -137,8 +137,7 @@ sealed class UIElement {
         val weight: Int,
         val width: Int,
         val height: Int,
-        val glb: String,
-        val gltf: String,
+        val model: String,
         val ibl: String,
         val skybox: String
     ) : UIElement()

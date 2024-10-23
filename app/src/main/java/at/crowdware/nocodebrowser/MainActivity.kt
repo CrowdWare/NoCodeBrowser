@@ -79,9 +79,9 @@ class MainActivity : ComponentActivity() {
         init { Utils.init() }
     }
 
-    lateinit var choreographer: Choreographer
-    lateinit var modelViewer: ModelViewer
-    lateinit var frameCallback: Choreographer.FrameCallback
+    //lateinit var choreographer: Choreographer
+    //lateinit var modelViewer: ModelViewer
+    //lateinit var frameCallback: Choreographer.FrameCallback
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity() {
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // Hide the navigation bar
                         or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY // Allows bringing the navbar back with a swipe
                 )
-
+/*
         choreographer = Choreographer.getInstance()
         val surfaceView = SurfaceView(this)
         modelViewer = ModelViewer(surfaceView)
@@ -114,7 +114,7 @@ class MainActivity : ComponentActivity() {
                 modelViewer.render(currentTime)
             }
         }
-
+*/
 
         installCacheFromAssets()
 
@@ -221,7 +221,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+/*
     fun loadIbl(ibl: String) {
         // Create the indirect light source and add it to the scene.
         var buffer = readAsset("envs/${ibl}.ktx")
@@ -249,25 +249,12 @@ class MainActivity : ComponentActivity() {
         val buffer = readAsset("models/${name}.gltf")
         modelViewer.loadModelGltf(buffer) { uri -> readAsset("models/$uri") }
         modelViewer.transformToUnitCube()
-    }
+    }*/
 
-    fun zoomCamera(distance: Float) {
+    /*fun zoomCamera(distance: Float) {
         // Ensure the distance is within reasonable bounds
         modelViewer.cameraFocalLength = distance
-        /*val adjustedDistance = distance.coerceIn(1.0, 100.0)  // Example limits
-        val camera = modelViewer.camera
-
-        camera.lookAt(
-            /* eyeX = */ 0.0, 0.0, adjustedDistance,  // Adjust the distance
-            /* centerX = */ 0.0, 0.0, 0.0,  // Keep camera pointed at the origin
-            /* upX = */ 0.0, 1.0, 0.0  // Keep up vector aligned with Y axis
-        )
-
-        // Force re-render after the camera adjustment
-        modelViewer.render(System.nanoTime()) // Ensure scene renders with updated camera
-        */
-
-    }
+    }*/
 
     private fun readAsset(assetName: String): ByteBuffer {
         val input = assets.open(assetName)
@@ -275,7 +262,7 @@ class MainActivity : ComponentActivity() {
         input.read(bytes)
         return ByteBuffer.wrap(bytes)
     }
-
+/*
     override fun onResume() {
         super.onResume()
         choreographer.postFrameCallback(frameCallback)
@@ -290,7 +277,7 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         choreographer.removeFrameCallback(frameCallback)
     }
-
+*/
     fun setNewApp(ap: App) {
         app = ap
     }
@@ -301,14 +288,15 @@ class MainActivity : ComponentActivity() {
     }
 
     fun sendToAnimation(cmd: String) {
+        // TODO
         if (cmd == "zoomin") {
             cameraDistance += 1.0F
-            zoomCamera(cameraDistance)
+            //zoomCamera(cameraDistance)
             println("zoomin: ${cameraDistance}")
         }
         else if(cmd == "zoomout") {
             cameraDistance -= 1.0F
-            zoomCamera(cameraDistance)
+            //zoomCamera(cameraDistance)
         }
     }
 

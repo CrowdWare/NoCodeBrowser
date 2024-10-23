@@ -283,8 +283,7 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                             width = (properties["width"] as? PropertyValue.IntValue)?.value ?: 0,
                             height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0,
                             weight = (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0,
-                            gltf = (properties["gltf"] as? PropertyValue.StringValue)?.value ?: "",
-                            glb = (properties["glb"] as? PropertyValue.StringValue)?.value ?: "",
+                            model = (properties["model"] as? PropertyValue.StringValue)?.value ?: "",
                             skybox = (properties["skybox"] as? PropertyValue.StringValue)?.value ?: "",
                             ibl = (properties["ibl"] as? PropertyValue.StringValue)?.value ?: "",
                         )
