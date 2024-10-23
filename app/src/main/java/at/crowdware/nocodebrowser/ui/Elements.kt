@@ -95,7 +95,10 @@ sealed class UIElement {
         val color: String,
         val fontSize: TextUnit,
         val fontWeight: FontWeight,
-        val textAlign: TextAlign
+        val textAlign: TextAlign,
+        val weight: Int,
+        val width: Int,
+        val height: Int
     ) : UIElement()
     data class ButtonElement(
         val label: String,
@@ -109,30 +112,45 @@ sealed class UIElement {
         val src: String,
         val scale: String,
         val weight: Int,
+        val width: Int,
+        val height: Int,
         val link: String) : UIElement()
     data class SpacerElement(
         val amount: Int,
         val weight: Int) : UIElement()
     data class VideoElement(
         val src: String,
-        val weight: Int) : UIElement()
+        val weight: Int,
+        val width: Int,
+        val height: Int) : UIElement()
     data class YoutubeElement(
         val id: String,
-        val weight: Int) : UIElement()
+        val weight: Int,
+        val width: Int,
+        val height: Int) : UIElement()
     data class SoundElement(
         val src: String) : UIElement()
     data class RowElement(
         val padding: Padding,
+        val weight: Int,
+        val width: Int,
+        val height: Int,
         val uiElements: MutableList<UIElement> = mutableListOf()) : UIElement()
     data class ColumnElement(
         val padding: Padding,
+        val weight: Int,
+        val width: Int,
+        val height: Int,
         val uiElements: MutableList<UIElement> = mutableListOf()) : UIElement()
     data class MarkdownElement(
         val text: String,
         val color: String,
         val fontSize: TextUnit,
         val fontWeight: FontWeight,
-        val textAlign: TextAlign) : UIElement()
+        val textAlign: TextAlign,
+        val weight: Int,
+        val width: Int,
+        val height: Int) : UIElement()
     data class SceneElement(
         val weight: Int,
         val width: Int,

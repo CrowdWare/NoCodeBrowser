@@ -79,43 +79,14 @@ class MainActivity : ComponentActivity() {
         init { Utils.init() }
     }
 
-    //lateinit var choreographer: Choreographer
-    //lateinit var modelViewer: ModelViewer
-    //lateinit var frameCallback: Choreographer.FrameCallback
-
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val context = this
         window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // Hide the navigation bar
-                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY // Allows bringing the navbar back with a swipe
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 )
-/*
-        choreographer = Choreographer.getInstance()
-        val surfaceView = SurfaceView(this)
-        modelViewer = ModelViewer(surfaceView)
-        cameraDistance = modelViewer.cameraFocalLength
-
-        // Set up the frame callback with your custom logic
-        frameCallback = object : Choreographer.FrameCallback {
-            private val startTime = System.nanoTime()
-            override fun doFrame(currentTime: Long) {
-                val seconds = (currentTime - startTime).toDouble() / 1_000_000_000
-                choreographer.postFrameCallback(this)
-
-                // Handle animation and rendering logic
-                modelViewer.animator?.apply {
-                    if (animationCount > 0) {
-                        applyAnimation(0, seconds.toFloat())
-                    }
-                    updateBoneMatrices()
-                }
-                modelViewer.render(currentTime)
-            }
-        }
-*/
-
         installCacheFromAssets()
 
         contentLoader.init(this)
@@ -221,35 +192,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-/*
-    fun loadIbl(ibl: String) {
-        // Create the indirect light source and add it to the scene.
-        var buffer = readAsset("envs/${ibl}.ktx")
-        KTX1Loader.createIndirectLight(modelViewer.engine, buffer).apply {
-            intensity = 50_000f
-            modelViewer.scene.indirectLight = this
-        }
-    }
-
-    fun loadSkybox(skybox: String) {
-        // Create the sky box and add it to the scene.
-        var buffer = readAsset("envs/${skybox}.ktx")
-        KTX1Loader.createSkybox(modelViewer.engine, buffer).apply {
-            modelViewer.scene.skybox = this
-        }
-    }
-
-    fun loadGlb(name: String) {
-        val buffer = readAsset("models/${name}.glb")
-        modelViewer.loadModelGlb(buffer)
-        modelViewer.transformToUnitCube()
-    }
-
-    fun loadGltf(name: String) {
-        val buffer = readAsset("models/${name}.gltf")
-        modelViewer.loadModelGltf(buffer) { uri -> readAsset("models/$uri") }
-        modelViewer.transformToUnitCube()
-    }*/
 
     /*fun zoomCamera(distance: Float) {
         // Ensure the distance is within reasonable bounds
@@ -262,22 +204,7 @@ class MainActivity : ComponentActivity() {
         input.read(bytes)
         return ByteBuffer.wrap(bytes)
     }
-/*
-    override fun onResume() {
-        super.onResume()
-        choreographer.postFrameCallback(frameCallback)
-    }
 
-    override fun onPause() {
-        super.onPause()
-        choreographer.removeFrameCallback(frameCallback)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        choreographer.removeFrameCallback(frameCallback)
-    }
-*/
     fun setNewApp(ap: App) {
         app = ap
     }
@@ -308,9 +235,12 @@ class MainActivity : ComponentActivity() {
     private fun installCacheFromAssets() {
         val directory = File(this.filesDir, "ContentCache/crowdware_github_io/NoCodeBrowser")
         var pages: File
+        var parts: File
         var images: File
         var sounds: File
         var videos: File
+        var models: File
+        var textures: File
 
         if (directory.exists()) {
             return // files exists, nothing to do
@@ -329,6 +259,12 @@ class MainActivity : ComponentActivity() {
             videos.mkdir()
             pages = File(directory, "pages")
             pages.mkdir()
+            parts = File(directory, "parts")
+            parts.mkdir()
+            models = File(directory, "models")
+            models.mkdir()
+            textures = File(directory, "textures")
+            textures.mkdir()
         }
 
         try {
@@ -336,8 +272,10 @@ class MainActivity : ComponentActivity() {
             copyDir("sounds", sounds)
             copyDir("videos", videos)
             copyDir("pages", pages)
+            copyDir("parts", pages)
+            copyDir("models", pages)
+            copyDir("textures", pages)
             copyDir("", directory)
-
         } catch(e: Exception) {
             println("Error in installCacheFromAssets: ${e.message}")
         }

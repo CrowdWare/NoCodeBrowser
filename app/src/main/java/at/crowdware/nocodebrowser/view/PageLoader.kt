@@ -83,8 +83,10 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.ByteBuffer
 
@@ -407,7 +409,7 @@ fun dynamicImageFromAssets(modifier: Modifier = Modifier, mainActivity: MainActi
         }
     }
     if (cacheName.isNotEmpty()) {
-        val bitmap = loadBitmapFromAssets(mainActivity, cacheName)
+        val bitmap = loadImageFromCache(mainActivity, cacheName)
         if (bitmap != null) {
             Image(
                 bitmap = bitmap.asImageBitmap(),
@@ -536,7 +538,7 @@ fun dynamicYoutube(modifier: Modifier = Modifier, videoId: String, height: Int =
     )
 }
 
-fun loadBitmapFromAssets(context: Context, filename: String): Bitmap? {
+fun loadImageFromCache(context: Context, filename: String): Bitmap? {
     return try {
         val file = File(context.filesDir, filename)
         if (file.exists()) {
@@ -550,42 +552,70 @@ fun loadBitmapFromAssets(context: Context, filename: String): Bitmap? {
     }
 }
 
-/*
-@Composable
-fun dynamicScene(modifier: Modifier = Modifier, element: UIElement.SceneElement) {
-    val ctx = LocalContext.current as MainActivity
-
-    AndroidView(
-        factory = { context ->
-            SurfaceView(context).apply {
-                ctx.modelViewer = ModelViewer(this)
-                setOnTouchListener(ctx.modelViewer)
-                ctx.loadGltf(element.gltf)
-                ctx.loadIbl(element.ibl)
-                ctx.loadSkybox(element.skybox)
-                //onModelLoaded()
-                ctx.choreographer.postFrameCallback(ctx.frameCallback)
-            }
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .then(if(element.width>0)Modifier.width(element.width.dp)else Modifier)
-            .then(if(element.height>0)Modifier.height(element.height.dp)else Modifier)
-    )
-
-    DisposableEffect(Unit) {
-        onDispose {
-            // Remove the frame callback when the composable is disposed
-            ctx.choreographer.removeFrameCallback(ctx.frameCallback)
-        }
-    }
-}
-*/
-
 @Composable
 fun dynamicScene(modifier: Modifier = Modifier, element: UIElement.SceneElement) {
     val context = LocalContext.current
+    val mainActivity = context as MainActivity
+    var modelCacheName by remember { mutableStateOf("") }
+    var iblCacheName by remember { mutableStateOf("") }
+    var skyboxCacheName by remember { mutableStateOf("") }
     val surfaceView = remember { SurfaceView(context) }
+    val modelViewer = remember(surfaceView) {
+        ModelViewer(surfaceView)
+    }
+
+    LaunchedEffect(element.model) {
+        modelCacheName = withContext(Dispatchers.IO) {
+            mainActivity.contentLoader.loadAsset(element.model, "models")
+        }
+    }
+    LaunchedEffect(element.ibl) {
+        iblCacheName = withContext(Dispatchers.IO) {
+            mainActivity.contentLoader.loadAsset(element.ibl, "models")
+        }
+    }
+    LaunchedEffect(element.skybox) {
+        skyboxCacheName = withContext(Dispatchers.IO) {
+            mainActivity.contentLoader.loadAsset(element.skybox, "models")
+        }
+    }
+    if (modelCacheName.isNotEmpty() && iblCacheName.isNotEmpty() && skyboxCacheName.isNotEmpty()) {
+        try {
+            val modelBuffer = loadAssetFromCache(modelCacheName, context)
+            if (element.model.endsWith(".gltf")) {
+                modelViewer.loadModelGltf(modelBuffer) { uri ->
+                    println("load requested: $uri")
+                    val assetCacheName = runBlocking(Dispatchers.IO) {
+                        if (uri.endsWith(".bin")) {
+                            mainActivity.contentLoader.loadAsset(uri, "models")
+                        } else {
+                            mainActivity.contentLoader.loadAsset(uri, "textures")
+                        }
+                    }
+                    loadAssetFromCache(assetCacheName, context)
+                }
+            } else {
+                modelViewer.loadModelGlb(modelBuffer)
+            }
+            modelViewer.transformToUnitCube()
+
+            val iblBuffer = loadAssetFromCache(iblCacheName, context)
+            KTX1Loader.createIndirectLight(modelViewer.engine, iblBuffer).apply {
+                intensity = 50_000f
+                modelViewer.scene.indirectLight = this
+            }
+
+            val skyboxBuffer = loadAssetFromCache(skyboxCacheName, context)
+            KTX1Loader.createSkybox(modelViewer.engine, skyboxBuffer).apply {
+                modelViewer.scene.skybox = this
+            }
+            surfaceView.setOnTouchListener(modelViewer)
+        } catch (e: Exception) {
+            println("Error on load in dynamic scene: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+    /*
     val modelViewer = remember(element.model, element.ibl, element.skybox) {
         ModelViewer(surfaceView).apply {
             try {
@@ -612,7 +642,7 @@ fun dynamicScene(modifier: Modifier = Modifier, element: UIElement.SceneElement)
                 println("Error in dynamic scene: ${e.message}")
             }
         }
-    }
+    }*/
     AndroidView(
         factory = { surfaceView },
         modifier = modifier
@@ -625,18 +655,22 @@ fun dynamicScene(modifier: Modifier = Modifier, element: UIElement.SceneElement)
     val frameCallback = remember {
         object : Choreographer.FrameCallback {
             override fun doFrame(currentTime: Long) {
-                // Berechne die vergangene Zeit in Sekunden
-                val seconds = (currentTime - startTime).toDouble() / 1_000_000_000
-                choreographer.postFrameCallback(this)
+                try {
+                    // Berechne die vergangene Zeit in Sekunden
+                    val seconds = (currentTime - startTime).toDouble() / 1_000_000_000
+                    choreographer.postFrameCallback(this)
 
-                // Handle animation and rendering logic
-                modelViewer.animator?.apply {
-                    if (animationCount > 0) {
-                        applyAnimation(0, seconds.toFloat())
+                    // Handle animation and rendering logic
+                    modelViewer.animator?.apply {
+                        if (animationCount > 0) {
+                            applyAnimation(0, seconds.toFloat())
+                        }
+                        updateBoneMatrices()
                     }
-                    updateBoneMatrices()
+                    modelViewer.render(currentTime)
+                } catch(e: Exception) {
+                    println("Error in doFrame: ${e.message}")
                 }
-                modelViewer.render(currentTime)
             }
         }
     }
@@ -649,9 +683,19 @@ fun dynamicScene(modifier: Modifier = Modifier, element: UIElement.SceneElement)
     }
 }
 
-fun readAsset(assetName: String, context: Context): ByteBuffer {
-    val input = context.assets.open(assetName)
-    val bytes = ByteArray(input.available())
-    input.read(bytes)
-    return ByteBuffer.wrap(bytes)
+fun loadAssetFromCache(assetName: String, context: Context): ByteBuffer {
+    return try {
+        val asset = File(context.filesDir, assetName)
+        if (asset.exists()) {
+            val input = asset.inputStream()
+            val bytes = ByteArray(input.available())
+            input.read(bytes)
+            ByteBuffer.wrap(bytes) // ByteBuffer zurückgeben
+        } else {
+            throw FileNotFoundException("Asset not found in cache: $assetName")
+        }
+    } catch (e: Exception) {
+        println("Error loading cached asset [$assetName]: ${e.message}")
+        ByteBuffer.allocate(0)
+    }
 }

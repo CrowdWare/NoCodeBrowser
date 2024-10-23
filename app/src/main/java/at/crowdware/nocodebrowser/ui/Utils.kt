@@ -326,17 +326,3 @@ fun parseMarkdown(markdown: String): AnnotatedString {
 
     return builder.toAnnotatedString()
 }
-
-fun getRootElement(xml: String): Element? {
-    return try {
-        val factory = DocumentBuilderFactory.newInstance()
-        val builder = factory.newDocumentBuilder()
-        val inputStream = ByteArrayInputStream(xml.toByteArray(Charsets.UTF_8))
-        val document: Document = builder.parse(inputStream)
-        document.documentElement.normalize()
-        document.documentElement
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
-    }
-}

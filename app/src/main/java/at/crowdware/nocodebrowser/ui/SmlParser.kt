@@ -175,6 +175,9 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                     "Text" -> {
                         elements.add(
                             TextElement(
+                                width = (properties["width"] as? PropertyValue.IntValue)?.value ?: 0,
+                                height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0,
+                                weight = (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0,
                             text = (properties["text"] as? PropertyValue.StringValue)?.value ?: "",
                             color = (properties["color"] as? PropertyValue.StringValue)?.value ?: "",
                             fontSize = ((properties["fontSize"] as? PropertyValue.IntValue)?.value ?: 14).sp,
@@ -198,12 +201,22 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                         )
                     }
                     "Column" -> {
-                        val col = ColumnElement(padding = parsePadding((properties["padding"] as? PropertyValue.StringValue)?.value ?: "0"))
+                        val col = ColumnElement(
+                            padding = parsePadding((properties["padding"] as? PropertyValue.StringValue)?.value ?: "0"),
+                            width = (properties["width"] as? PropertyValue.IntValue)?.value ?: 0,
+                            height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0,
+                            weight = (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0,
+                            )
                         parseNestedElements(extractChildElements(element), col.uiElements as MutableList<UIElement>)
                         elements.add(col)
                     }
                     "Row" -> {
-                        val row = RowElement(padding = parsePadding((properties["padding"] as? PropertyValue.StringValue)?.value ?: "0"))
+                        val row = RowElement(
+                            padding = parsePadding((properties["padding"] as? PropertyValue.StringValue)?.value ?: "0"),
+                            width = (properties["width"] as? PropertyValue.IntValue)?.value ?: 0,
+                            height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0,
+                            weight = (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0,
+                            )
                         parseNestedElements(extractChildElements(element), row.uiElements as MutableList<UIElement>)
                         elements.add(row)
                     }
@@ -211,6 +224,9 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                         val md = ((properties["text"] as? PropertyValue.StringValue)?.value ?: "").split("\n").joinToString("\n") { it.trim() }
                         val ele = MarkdownElement(
                             text = md,
+                            width = (properties["width"] as? PropertyValue.IntValue)?.value ?: 0,
+                            height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0,
+                            weight = (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0,
                             color = (properties["color"] as? PropertyValue.StringValue)?.value ?: "",
                             fontSize = ((properties["fontSize"] as? PropertyValue.IntValue)?.value ?: 14).sp,
                             fontWeight = when((properties["fontWeight"] as? PropertyValue.StringValue)?.value ?: "") {
@@ -253,6 +269,8 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                             src = (properties["src"] as? PropertyValue.StringValue)?.value ?: "",
                             scale = (properties["scale"] as? PropertyValue.StringValue)?.value ?: "1",
                             link = (properties["link"] as? PropertyValue.StringValue)?.value ?: "",
+                            width = (properties["width"] as? PropertyValue.IntValue)?.value ?: 0,
+                            height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0,
                             weight =  (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0
                         )
                         elements.add(img)
@@ -267,6 +285,8 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                     "Video" -> {
                         val vid = VideoElement(
                             src = (properties["src"] as? PropertyValue.StringValue)?.value ?: "",
+                            width = (properties["width"] as? PropertyValue.IntValue)?.value ?: 0,
+                            height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0,
                             weight =  (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0
                         )
                         elements.add(vid)
@@ -274,6 +294,8 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                     "Youtube" -> {
                         val yt = YoutubeElement(
                             id = (properties["id"] as? PropertyValue.StringValue)?.value ?: "",
+                            width = (properties["width"] as? PropertyValue.IntValue)?.value ?: 0,
+                            height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0,
                             weight =  (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0
                         )
                         elements.add(yt)

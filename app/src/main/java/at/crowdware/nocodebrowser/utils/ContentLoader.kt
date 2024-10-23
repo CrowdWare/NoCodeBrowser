@@ -18,13 +18,8 @@
  *
  ****************************************************************************/
 package at.crowdware.nocodebrowser.utils
-import android.annotation.SuppressLint
-import android.content.Context
-import android.os.Binder
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
 import at.crowdware.nocodebrowser.MainActivity
 import at.crowdware.nocodebrowser.parseApp
 import at.crowdware.nocodebrowser.parsePage
@@ -138,7 +133,7 @@ class ContentLoader {
         if (result == null) {
             return null
         }
-        val fileName = ("ContentCache/" + appUrl.substringAfter("://") + "/pages/$name.sml").replace(".", "_").replace(":", "_")
+        val fileName = ("ContentCache/" + appUrl.substringAfter("://") + "/pages/$name").replace(".", "_").replace(":", "_") + ".sml"
         val file = File(context.filesDir, fileName)
         fileContent = if (file.exists()) {
             val lastModifiedMillis = file.lastModified()
@@ -189,7 +184,7 @@ class ContentLoader {
 
         appUrl = url.substringBefore("/app.sml")
 
-        val fileName = "ContentCache/" + url.substringAfter("://").replace(".", "_").replace(":", "_")
+        val fileName = "ContentCache/" + appUrl.substringAfter("://").replace(".", "_").replace(":", "_") + "/app.sml"
         val file = File(context.filesDir, fileName)
 
         // Make sure the parent directories exist
@@ -224,14 +219,15 @@ class ContentLoader {
                 appLoaded = true
             }
 
+            /*
             // clear cache
-            val godotCache = File(context.filesDir, "GodotCache")
-            godotCache.deleteRecursively()
+            val scenesCache = File(context.filesDir, "ScenesCache")
+            scenesCache.deleteRecursively()
 
-            // copy all godot files to GodotCache
+            // copy all scene files to SceneCache
             for (file in app?.deployment?.files!!) {
-                if (file.type == "godot") {
-                    val url = "$appUrl/godot/${file.path}"
+                if (file.type == "models" || file.type == "textures") {
+                    val url = "$appUrl/${file.type}/${file.path}"
                     val fileName = "ContentCache/" + appUrl.substringAfter("://").replace(".", "_").replace(":", "_") + "/" + file.path
                     val cacheFile = File(context.filesDir, fileName)
                     if (cacheFile.exists()) {
@@ -250,7 +246,7 @@ class ContentLoader {
                     cacheFile.copyTo(File(context.filesDir , "/GodotCache/$filePath"), true)
                     println("copy file: $filePath")
                 }
-            }
+            }*/
         } else {
             // use pre cached version
             app = parseApp(fileContent)
@@ -324,15 +320,14 @@ class ContentLoader {
         }
         if (bytes != null) {
             val cache = File(context.filesDir, fileName)
-            // Make sure the parent directories exist
             val parentDir = cache.parentFile
             if (parentDir != null && !parentDir.exists()) {
                 parentDir.mkdirs()
             }
             cache.writeBytes(bytes)
             val millis = time
-                .atZone(ZoneId.systemDefault()) // Convert to ZonedDateTime in the system's default time zone
-                .toInstant() // Convert to Instant (which represents a moment in time)
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
                 .toEpochMilli()
             cache.setLastModified(millis)
         }
