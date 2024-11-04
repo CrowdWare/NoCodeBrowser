@@ -115,6 +115,7 @@ fun deserializeApp(parsedResult: List<Any>): App {
                         app.id = (properties["id"] as? PropertyValue.StringValue)?.value ?: ""
                         app.icon = (properties["icon"] as? PropertyValue.StringValue)?.value ?: ""
                         app.name = (properties["name"] as? PropertyValue.StringValue)?.value ?: ""
+                        app.description = (properties["description"] as? PropertyValue.StringValue)?.value ?: ""
                         app.smlVersion = (properties["smlVersion"] as? PropertyValue.StringValue)?.value ?: ""
                         parseNestedAppElements(extractChildElements(tuple), app)
                     }
@@ -224,6 +225,7 @@ fun parseNestedElements(nestedElements: List<Any>, elements: MutableList<UIEleme
                         val md = ((properties["text"] as? PropertyValue.StringValue)?.value ?: "").split("\n").joinToString("\n") { it.trim() }
                         val ele = MarkdownElement(
                             text = md,
+                            part = (properties["part"] as? PropertyValue.StringValue)?.value ?: "",
                             width = (properties["width"] as? PropertyValue.IntValue)?.value ?: 0,
                             height = (properties["height"] as? PropertyValue.IntValue)?.value ?: 0,
                             weight = (properties["weight"] as? PropertyValue.IntValue)?.value ?: 0,

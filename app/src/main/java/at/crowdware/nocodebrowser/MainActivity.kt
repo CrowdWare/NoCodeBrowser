@@ -25,8 +25,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.Choreographer
-import android.view.SurfaceView
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -59,8 +57,6 @@ import at.crowdware.nocodebrowser.ui.widgets.NavigationItem
 import at.crowdware.nocodebrowser.ui.widgets.NavigationView
 import at.crowdware.nocodebrowser.utils.ContentLoader
 import at.crowdware.nocodebrowser.view.LoadPage
-import com.google.android.filament.utils.KTX1Loader
-import com.google.android.filament.utils.ModelViewer
 import com.google.android.filament.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -282,11 +278,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun copyDir(source: String, directory: File) {
-        println("copyDir: $source, ${directory.path}")
         val files = this.assets.list(source)
         if (files != null) {
             for (file in files) {
-                println("copy: $source/$file")
                 if (source == "")
                     copyFile("$file", file, directory)
                 else

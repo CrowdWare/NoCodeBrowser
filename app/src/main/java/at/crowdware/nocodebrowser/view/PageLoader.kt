@@ -289,16 +289,45 @@ fun renderText(element: UIElement.TextElement) {
 
 @Composable
 fun renderMarkdown(element: UIElement.MarkdownElement) {
-    val parsedMarkdown = parseMarkdown(element.text.trim())
-    Text(
-        text = parsedMarkdown,
-        style = TextStyle(
-            color = hexToColor(element.color, MaterialTheme.colorScheme.onBackground),
-            fontSize = element.fontSize,
-            fontWeight = element.fontWeight,
-            textAlign = element.textAlign
+    val context = LocalContext.current
+    val mainActivity = context as MainActivity
+    var cacheName by remember { mutableStateOf("") }
+    var text = ""
+
+    if (element.part.isNotEmpty()) {
+        LaunchedEffect(element.part) {
+            cacheName = withContext(Dispatchers.IO) {
+                mainActivity.contentLoader.loadAsset(element.part, "parts")
+            }
+        }
+        if (cacheName.isNotEmpty()) {
+                text = loadTextAssetFromCache(cacheName, context).toString()
+                println("text: $text")
+                val parsedMarkdown = parseMarkdown(text)
+                Text(
+                    text = parsedMarkdown,
+                    style = TextStyle(
+                        color = hexToColor(element.color, MaterialTheme.colorScheme.onBackground),
+                        fontSize = element.fontSize,
+                        fontWeight = element.fontWeight,
+                        textAlign = element.textAlign
+                    )
+                )
+
+        }
+    } else {
+        text = element.text.trim()
+        val parsedMarkdown = parseMarkdown(text)
+        Text(
+            text = parsedMarkdown,
+            style = TextStyle(
+                color = hexToColor(element.color, MaterialTheme.colorScheme.onBackground),
+                fontSize = element.fontSize,
+                fontWeight = element.fontWeight,
+                textAlign = element.textAlign
+            )
         )
-    )
+    }
 }
 
 @Composable
@@ -584,7 +613,6 @@ fun dynamicScene(modifier: Modifier = Modifier, element: UIElement.SceneElement)
             val modelBuffer = loadAssetFromCache(modelCacheName, context)
             if (element.model.endsWith(".gltf")) {
                 modelViewer.loadModelGltf(modelBuffer) { uri ->
-                    println("load requested: $uri")
                     val assetCacheName = runBlocking(Dispatchers.IO) {
                         if (uri.endsWith(".bin")) {
                             mainActivity.contentLoader.loadAsset(uri, "models")
@@ -615,34 +643,7 @@ fun dynamicScene(modifier: Modifier = Modifier, element: UIElement.SceneElement)
             e.printStackTrace()
         }
     }
-    /*
-    val modelViewer = remember(element.model, element.ibl, element.skybox) {
-        ModelViewer(surfaceView).apply {
-            try {
-                val buffer = readAsset("models/${element.model}", context)
-                if (element.model.endsWith(".gltf"))
-                    loadModelGltf(buffer) { uri -> readAsset("$uri", context) }
-                else
-                    loadModelGlb(buffer)
-                transformToUnitCube()
 
-                val bufferIbl = readAsset("models/${element.ibl}", context)
-                KTX1Loader.createIndirectLight(engine, bufferIbl).apply {
-                    intensity = 50_000f
-                    scene.indirectLight = this
-                }
-
-                val bufferSkybox = readAsset("models/${element.skybox}", context)
-                KTX1Loader.createSkybox(engine, bufferSkybox).apply {
-                    scene.skybox = this
-                }
-
-                surfaceView.setOnTouchListener(this)
-            } catch(e: Exception) {
-                println("Error in dynamic scene: ${e.message}")
-            }
-        }
-    }*/
     AndroidView(
         factory = { surfaceView },
         modifier = modifier
@@ -690,12 +691,26 @@ fun loadAssetFromCache(assetName: String, context: Context): ByteBuffer {
             val input = asset.inputStream()
             val bytes = ByteArray(input.available())
             input.read(bytes)
-            ByteBuffer.wrap(bytes) // ByteBuffer zurückgeben
+            ByteBuffer.wrap(bytes)
         } else {
             throw FileNotFoundException("Asset not found in cache: $assetName")
         }
     } catch (e: Exception) {
         println("Error loading cached asset [$assetName]: ${e.message}")
         ByteBuffer.allocate(0)
+    }
+}
+
+fun loadTextAssetFromCache(assetName: String, context: Context): String {
+    return try {
+        val asset = File(context.filesDir, assetName)
+        if (asset.exists()) {
+            asset.readText()
+        } else {
+            throw FileNotFoundException("Asset not found in cache: $assetName")
+        }
+    } catch (e: Exception) {
+        println("Error loading cached asset [$assetName]: ${e.message}")
+        ""
     }
 }

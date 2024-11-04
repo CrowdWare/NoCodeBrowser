@@ -30,6 +30,7 @@ data class App(
     var icon: String = "",
     var id: String = "",
     var smlVersion: String = "",
+    var description: String = "",
     var theme: ThemeElement = ThemeElement(),
     var navigation: NavigationElement = NavigationElement(),
     var deployment: DeploymentElement = DeploymentElement()
@@ -144,6 +145,7 @@ sealed class UIElement {
         val uiElements: MutableList<UIElement> = mutableListOf()) : UIElement()
     data class MarkdownElement(
         val text: String,
+        val part: String,
         val color: String,
         val fontSize: TextUnit,
         val fontWeight: FontWeight,

@@ -87,6 +87,7 @@ class ContentLoader {
     suspend fun loadAsset(name: String, subdir: String): String {
         var fileContent: ByteArray? = null
         val url = "$appUrl/$subdir/$name"
+        println("loadAsset: $url")
         if(app == null)
             return ""
         val result = app!!.deployment.files.find { it.path == "$name" }
@@ -114,7 +115,6 @@ class ContentLoader {
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun switchApp(url: String) {
-        println("switchApp: from $appUrl to $url")
         if(url != appUrl) {
             val app = loadApp(url+ "/app.sml")
             if(app != null)
@@ -124,7 +124,6 @@ class ContentLoader {
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun loadPage(name: String): Page? {
-        println("loadPage: $name")
         var fileContent = ""
         val url = "$appUrl/pages/$name.sml"
         if (app == null)
@@ -218,35 +217,6 @@ class ContentLoader {
                 app = parseApp(appContent)
                 appLoaded = true
             }
-
-            /*
-            // clear cache
-            val scenesCache = File(context.filesDir, "ScenesCache")
-            scenesCache.deleteRecursively()
-
-            // copy all scene files to SceneCache
-            for (file in app?.deployment?.files!!) {
-                if (file.type == "models" || file.type == "textures") {
-                    val url = "$appUrl/${file.type}/${file.path}"
-                    val fileName = "ContentCache/" + appUrl.substringAfter("://").replace(".", "_").replace(":", "_") + "/" + file.path
-                    val cacheFile = File(context.filesDir, fileName)
-                    if (cacheFile.exists()) {
-                        val lastModifiedMillis = cacheFile.lastModified()
-                        val lastModifiedDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastModifiedMillis), ZoneId.systemDefault())
-                        if (file.time.isAfter(lastModifiedDateTime)) {
-                            println("download: $fileName")
-                            loadAndCacheAsset(url,fileName, file.time)
-                        }
-                    } else {
-                        println("download: $fileName")
-                        loadAndCacheAsset(url,fileName, file.time)
-                    }
-                    // now copy file to GodotCache
-                    val filePath = file.path.substringAfter("/")
-                    cacheFile.copyTo(File(context.filesDir , "/GodotCache/$filePath"), true)
-                    println("copy file: $filePath")
-                }
-            }*/
         } else {
             // use pre cached version
             app = parseApp(fileContent)
