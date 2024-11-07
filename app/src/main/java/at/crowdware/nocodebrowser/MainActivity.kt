@@ -215,7 +215,6 @@ class MainActivity : ComponentActivity() {
         if (cmd == "zoomin") {
             cameraDistance += 1.0F
             //zoomCamera(cameraDistance)
-            println("zoomin: ${cameraDistance}")
         }
         else if(cmd == "zoomout") {
             cameraDistance -= 1.0F

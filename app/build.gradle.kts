@@ -1,7 +1,35 @@
+import java.time.LocalDateTime
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
 }
+
+
+// read local.properties file
+val localPropsFile = file("../local.properties")
+val localProps = Properties()
+localProps.load(localPropsFile.inputStream())
+
+// increment versionCode
+val currentVersionCode = localProps["VERSION_CODE"].toString().toInt()
+val newVersionCode = currentVersionCode + 1
+localProps["VERSION_CODE"] = newVersionCode.toString()
+
+// write new versionCode back to the file
+localProps.store(localPropsFile.outputStream(), null)
+
+// masterpiece in version numbering ;-)
+// version will increment all 10 minutes
+val currentDateTime: LocalDateTime = LocalDateTime.now()
+val majorVersion = (currentDateTime.year - 2014) / 10
+val yearPart = (currentDateTime.year - 2014) - 10
+val monthPart = String.format("%02d", currentDateTime.monthValue)
+val dayPart = String.format("%02d", currentDateTime.dayOfMonth)
+val hourPart = String.format("%02d", currentDateTime.hour)
+val minutesPart = String.format("%02d", currentDateTime.minute)
+val version = "$majorVersion.$yearPart$monthPart.$dayPart$hourPart$minutesPart".take(11)
 
 android {
     namespace = "at.crowdware.nocodebrowser"
@@ -25,8 +53,8 @@ android {
         applicationId = "at.crowdware.nocodebrowser"
         minSdk = 29
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = newVersionCode
+        versionName = "$version"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -99,4 +127,34 @@ dependencies {
     implementation("com.google.android.filament:filament-android:1.54.5")
     implementation("com.google.android.filament:filament-utils-android:1.54.5")
     implementation("com.google.android.filament:gltfio-android:1.54.5")
+}
+
+tasks.named("assemble") {
+    mustRunAfter("generateVersionFile")
+}
+
+tasks.register("generateVersionFile") {
+    val outputDir = layout.buildDirectory.dir("generated/version").get().asFile
+    val versionValue = version
+
+    inputs.property("version", versionValue)
+    outputs.dir(outputDir)
+
+    doLast {
+        // Schreibe die Versionsnummer in die Datei
+        val versionFile = outputDir.resolve("Version.kt")
+        versionFile.parentFile.mkdirs()
+        versionFile.writeText("""
+            package at.crowdware.nocodedesigner
+
+            object Version {
+                const val version = "$versionValue"
+            }
+        """.trimIndent())
+        println("Version changed to: $versionValue")
+    }
+}
+
+tasks.named("build") {
+    dependsOn("generateVersionFile")
 }

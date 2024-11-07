@@ -32,7 +32,6 @@ data class App(
     var smlVersion: String = "",
     var description: String = "",
     var theme: ThemeElement = ThemeElement(),
-    var navigation: NavigationElement = NavigationElement(),
     var deployment: DeploymentElement = DeploymentElement()
 )
 
@@ -68,18 +67,13 @@ data class ThemeElement(
     var scrim: String = ""
 )
 
-data class NavigationElement(
-    var type: String = "",
-    val items: MutableList<ItemElement> = mutableListOf()
-)
-
 data class DeploymentElement(
     val files: MutableList<FileElement> = mutableListOf()
 )
 
 data class FileElement(val path: String, val time: LocalDateTime, val type: String)
 
-data class ItemElement (val page: String)
+data class PageElement (val src: String)
 
 
 data class Page(

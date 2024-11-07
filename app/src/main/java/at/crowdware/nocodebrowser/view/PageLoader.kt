@@ -302,7 +302,6 @@ fun renderMarkdown(element: UIElement.MarkdownElement) {
         }
         if (cacheName.isNotEmpty()) {
                 text = loadTextAssetFromCache(cacheName, context).toString()
-                println("text: $text")
                 val parsedMarkdown = parseMarkdown(text)
                 Text(
                     text = parsedMarkdown,

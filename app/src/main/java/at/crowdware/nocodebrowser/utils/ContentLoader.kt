@@ -87,9 +87,9 @@ class ContentLoader {
     suspend fun loadAsset(name: String, subdir: String): String {
         var fileContent: ByteArray? = null
         val url = "$appUrl/$subdir/$name"
-        println("loadAsset: $url")
-        if(app == null)
+        if(app == null) {
             return ""
+        }
         val result = app!!.deployment.files.find { it.path == "$name" }
         if (result == null) {
             return ""

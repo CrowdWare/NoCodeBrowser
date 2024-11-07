@@ -27,14 +27,13 @@ import androidx.compose.ui.unit.sp
 import at.crowdware.nocodebrowser.ui.App
 import at.crowdware.nocodebrowser.ui.DeploymentElement
 import at.crowdware.nocodebrowser.ui.FileElement
-import at.crowdware.nocodebrowser.ui.ItemElement
-import at.crowdware.nocodebrowser.ui.NavigationElement
 import at.crowdware.nocodebrowser.ui.UIElement.ButtonElement
 import at.crowdware.nocodebrowser.ui.UIElement.ColumnElement
 import at.crowdware.nocodebrowser.ui.UIElement.ImageElement
 import at.crowdware.nocodebrowser.ui.UIElement.MarkdownElement
 import at.crowdware.nocodebrowser.ui.Padding
 import at.crowdware.nocodebrowser.ui.Page
+import at.crowdware.nocodebrowser.ui.PageElement
 import at.crowdware.nocodebrowser.ui.UIElement.RowElement
 import at.crowdware.nocodebrowser.ui.UIElement.SoundElement
 import at.crowdware.nocodebrowser.ui.UIElement.SpacerElement
@@ -328,11 +327,6 @@ fun parseNestedAppElements(nestedElements: List<Any>, app: App) {
                 val properties = extractProperties(element)
 
                 when (elementName) {
-                    "Navigation" -> {
-                        val type = (properties["type"] as? PropertyValue.StringValue)?.value ?: ""
-                        app.navigation.type = type
-                        parseNestedNavElements(extractChildElements(element), app.navigation)
-                    }
                     "Deployment" -> {
                         parseNestedDeployElements(extractChildElements(element), app.deployment)
                     }
@@ -365,24 +359,6 @@ fun parseNestedAppElements(nestedElements: List<Any>, app: App) {
                         app.theme.surfaceVariant = (properties["surfaceVariant"] as? PropertyValue.StringValue)?.value ?: ""
                         app.theme.tertiary = (properties["tertiary"] as? PropertyValue.StringValue)?.value ?: ""
                         app.theme.tertiaryContainer = (properties["tertiaryContainer"] as? PropertyValue.StringValue)?.value ?: ""
-                    }
-                }
-            }
-        }
-    }
-}
-
-fun parseNestedNavElements(nestedElements: List<Any>, navigation: NavigationElement) {
-    nestedElements.forEach { element ->
-        when (element) {
-            is Tuple7<*, *, *, *, *, *, *> -> {
-                val elementName = (element.t2 as? TokenMatch)?.text
-                val properties = extractProperties(element)
-
-                when (elementName) {
-                    "Item" -> {
-                        val page = (properties["page"] as? PropertyValue.StringValue)?.value ?: ""
-                        navigation.items.add(ItemElement(page))
                     }
                 }
             }
