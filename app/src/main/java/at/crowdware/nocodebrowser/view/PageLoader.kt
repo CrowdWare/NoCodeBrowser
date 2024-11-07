@@ -30,6 +30,7 @@ import android.view.SurfaceView
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,11 +57,13 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -74,15 +77,18 @@ import androidx.navigation.NavHostController
 import at.crowdware.nocodebrowser.MainActivity
 import at.crowdware.nocodebrowser.ui.Padding
 import at.crowdware.nocodebrowser.ui.Page
+import at.crowdware.nocodebrowser.ui.SettingsDialog
 import at.crowdware.nocodebrowser.ui.UIElement
 import at.crowdware.nocodebrowser.ui.hexToColor
 import at.crowdware.nocodebrowser.ui.parseMarkdown
+import at.crowdware.nocodebrowser.ui.widgets.NavigationManager
 import com.google.android.filament.utils.KTX1Loader
 import com.google.android.filament.utils.ModelViewer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -102,6 +108,7 @@ fun LoadPage(
     var page:Page? by remember { mutableStateOf(Page(color="#FFFFFF", backgroundColor = "#000000", padding = Padding(0,0,0,0), "false", elements = mutableListOf()))}
     var isLoading by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         page = withContext(Dispatchers.IO) {
@@ -122,18 +129,51 @@ fun LoadPage(
             if (page!!.scrollable == "true") {
                 modifier = modifier.verticalScroll(scrollState)
             }
-            Column(
-                modifier = modifier
-                    .padding(
-                        start = padding.left.dp,
-                        top = padding.top.dp,
-                        bottom = padding.bottom.dp,
-                        end = padding.right.dp
-                    )
+            var showSettingsDialog by remember { mutableStateOf(false) }
+
+            Box(
+                modifier = Modifier
                     .fillMaxSize()
-                    .background(color = hexToColor(bgColor, MaterialTheme.colorScheme.background))
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onLongPress = {
+                                showSettingsDialog = true
+                            }
+                        )
+                    }
             ) {
-                RenderPage(page!!, mainActivity, navController)
+                if (showSettingsDialog) {
+                    SettingsDialog(
+                        onDismiss = {showSettingsDialog = false},
+                        onConfirm = {
+                        showSettingsDialog = false
+                        scope.launch {
+                            withContext(Dispatchers.IO) {
+                                mainActivity.contentLoader.switchApp("https://crowdware.github.io/NoCodeBrowser/app.sml")
+                            }
+                            NavigationManager.navigate("home")
+                        }
+
+                    })
+                }
+                Column(
+                    modifier = modifier
+                        .padding(
+                            start = padding.left.dp,
+                            top = padding.top.dp,
+                            bottom = padding.bottom.dp,
+                            end = padding.right.dp
+                        )
+                        .fillMaxSize()
+                        .background(
+                            color = hexToColor(
+                                bgColor,
+                                MaterialTheme.colorScheme.background
+                            )
+                        )
+                ) {
+                    RenderPage(page!!, mainActivity, navController)
+                }
             }
         }
     }
