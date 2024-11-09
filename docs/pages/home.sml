@@ -1,5 +1,6 @@
 Page {
 	padding: "8"
+	title: "NoCodeBrowser"
 
 	Column {
 		padding: "8"

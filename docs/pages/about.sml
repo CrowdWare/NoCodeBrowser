@@ -1,5 +1,6 @@
 Page {
 	padding: "8"
+	title: "About"
 
 	Column {
 		padding: "8"
