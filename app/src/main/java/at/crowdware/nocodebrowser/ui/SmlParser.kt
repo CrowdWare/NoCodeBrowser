@@ -377,12 +377,11 @@ fun parseNestedDeployElements(nestedElements: List<Any>, deployment: DeploymentE
                 when (elementName) {
                     "File" -> {
                         val path = (properties["path"] as? PropertyValue.StringValue)?.value ?: ""
-                        val title = (properties["title"] as? PropertyValue.StringValue)?.value ?: ""
                         val date = (properties["time"] as? PropertyValue.StringValue)?.value ?: ""
                         val type = (properties["type"] as? PropertyValue.StringValue)?.value ?: ""
                         val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH.mm.ss")
                         val dateTime = LocalDateTime.parse(date, formatter)
-                        deployment.files.add(FileElement(path, dateTime, type, title))
+                        deployment.files.add(FileElement(path, dateTime, type))
                     }
                 }
             }

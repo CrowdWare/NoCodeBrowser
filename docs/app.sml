@@ -2,7 +2,7 @@ App {
 	name: "MyApp"
 	icon: "icon.png"
 	id: "at.crowdware.nocodebrowser"
- smlVersion: "1.1"
+	smlVersion: "1.1"
 
   Theme {
     primary: "#FF0C8CE9"
@@ -39,9 +39,9 @@ App {
 
 // deployment start - don't edit here
 Deployment {
-  File { path: "about.sml" time: "2024.11.09 15.33.02" type: "page" }
-  File { path: "video.sml" time: "2024.11.09 06.55.24" type: "page" }
-  File { path: "home.sml" time: "2024.11.09 15.33.03" type: "page" }
+  File { path: "about.sml" time: "2024.11.09 15.33.02" type: "page-en" }
+  File { path: "video.sml" time: "2024.11.09 06.55.24" type: "page-en" }
+  File { path: "home.sml" time: "2024.11.09 16.23.39" type: "page-en" }
   File { path: "about.sml" time: "2024.11.09 07.30.21" type: "page-de" }
   File { path: "home.sml" time: "2024.11.09 07.30.07" type: "page-de" }
   File { path: "about.sml" time: "2024.11.09 15.35.59" type: "page-es" }
