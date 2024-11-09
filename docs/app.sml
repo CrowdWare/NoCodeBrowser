@@ -39,11 +39,11 @@ App {
 
 // deployment start - don't edit here
 Deployment {
-  File { path: "about.sml" time: "2024.11.09 15.33.02" type: "page-en" title="About"}
+  File { path: "about.sml" time: "2024.11.09 15.33.02" type: "page-en" }
   File { path: "video.sml" time: "2024.11.09 06.55.24" type: "page-en" }
   File { path: "home.sml" time: "2024.11.09 16.23.39" type: "page-en" }
-  File { path: "about.sml" time: "2024.11.09 07.30.21" type: "page-de" title = "Über"}
-  File { path: "home.sml" time: "2024.11.09 07.30.07" type: "page-de" title = "NoCodeBrowser"}
+  File { path: "about.sml" time: "2024.11.09 07.30.22" type: "page-de" title: "Über"}
+  File { path: "home.sml" time: "2024.11.09 07.30.08" type: "page-de" title: "NoCodeBrowser"}
   File { path: "about.sml" time: "2024.11.09 15.35.59" type: "page-es" }
   File { path: "home.sml" time: "2024.11.09 15.37.55" type: "page-es" }
   File { path: "about.sml" time: "2024.11.09 15.44.54" type: "page-pt" }
