@@ -33,6 +33,5 @@ Page {
 
 		Spacer { weight: 1 }
 		Button { label: "About NoCode" link: "page:about"}
-		//Button { label: "Introduction Video" link: "page:video"}
 	}
 }
