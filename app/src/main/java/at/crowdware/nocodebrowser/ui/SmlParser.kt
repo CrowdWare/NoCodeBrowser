@@ -382,7 +382,7 @@ fun parseNestedDeployElements(nestedElements: List<Any>, deployment: DeploymentE
                         val title = (properties["title"] as? PropertyValue.StringValue)?.value ?: ""
                         val formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH.mm.ss")
                         val dateTime = LocalDateTime.parse(date, formatter)
-                        deployment.files.add(FileElement(path, dateTime, type, title))
+                        deployment.files.add(FileElement(path, dateTime, type))
                     }
                 }
             }

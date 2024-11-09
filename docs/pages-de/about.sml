@@ -46,6 +46,6 @@ Page {
 				**Die Benutzeroberfläche der Browser-App verschwindet, bis Sie den Browser neu starten.**"
 		}
     		Spacer { weight: 1 }
-   		Button { label: "Zurück zur Startseite" link: "page:home" }
+   		Button { label: "Zurück zur Startseite" link: "page:app.home" }
 	}
 }

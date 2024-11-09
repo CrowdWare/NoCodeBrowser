@@ -29,6 +29,6 @@ Page {
 			text: "Comece agora, crie um e-book ou até mesmo um aplicativo e produza conteúdos para outras pessoas, o que ajudará você a se aproximar de seus sonhos."}
 
 		Spacer { weight: 1 }
-		Button { label: "Sobre NoCode" link: "page:about"}
+		Button { label: "Sobre NoCode" link: "page:app.about"}
 	}
 }

@@ -4,7 +4,7 @@
     <string name="settings">Agordoj</string>
     <string name="navigation_home">Ĉefpaĝo</string>
     <string name="navigation_about">Pri ni</string>
-    <string name="about_shift">NoCodeBrowser 1.0</string>
+    <string name="about">Pri</string>
     <string name="about_dialog_text">NoCodeBrowser estas facila maniero por dinamike elŝuti, testi, kaj ruli aplikaĵojn per la interreto.\nTio signifas, ke la tuta aplikaĵo estas instalita sur retejo, kaj la enhavo estas aŭtomate elŝutita de la aplikaĵo.</string>
     <string name="personal_data">Personaj Datumoj</string>
     <string name="select_preferred_language">Elektu preferatan lingvon</string>

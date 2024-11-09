@@ -118,8 +118,9 @@ class ContentLoader {
     suspend fun switchApp(url: String) {
         if(url != appUrl) {
             val app = loadApp(url+ "/app.sml")
-            if(app != null)
+            if(app != null) {
                 context.setNewApp(app)
+            }
         }
     }
 
@@ -197,9 +198,10 @@ class ContentLoader {
             parentDir.mkdirs()
         }
 
-        // Check if cached file exists
+        // Check if pre cached file exists
         if (file.exists()) {
             fileContent = file.readText()
+            println("using cached: $fileContent")
         }
 
         if (!fileContent.contains("at.crowdware.nocodebrowser") || fileContent.isEmpty()) {

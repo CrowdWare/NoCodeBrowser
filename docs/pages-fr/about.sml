@@ -44,6 +44,6 @@ Page {
 				**L'interface utilisateur de l'application de navigateur disparaîtra jusqu'à ce que vous redémarriez le navigateur.**"
 		}
     		Spacer { weight: 1 }
-   		Button { label: "Retour à la page d'accueil" link: "page:home" }
+   		Button { label: "Retour à la page d'accueil" link: "page:app.home" }
 	}
 }

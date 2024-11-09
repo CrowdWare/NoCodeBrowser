@@ -4,7 +4,7 @@
     <string name="settings">Configurações</string>
     <string name="navigation_home">Página Inicial</string>
     <string name="navigation_about">Sobre Nós</string>
-    <string name="about_shift">NoCodeBrowser 1.0</string>
+    <string name="about">Sobre</string>
     <string name="about_dialog_text">NoCodeBrowser é uma maneira simples de carregar, testar e executar aplicativos dinamicamente pela Internet.\nIsso significa que o aplicativo completo é instalado em um servidor web e o conteúdo é automaticamente baixado pelo aplicativo.</string>
     <string name="personal_data">Dados Pessoais</string>
     <string name="select_preferred_language">Selecionar idioma preferido</string>

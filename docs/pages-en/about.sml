@@ -44,6 +44,6 @@ Page {
 				**The user interface for the browser app will disappear until you restart the browser.**"
 		}
     		Spacer { weight: 1 }
-   		Button { label: "Back Home" link: "page:home" }
+   		Button { label: "Back Home" link: "page:app.home" }
 	}
 }

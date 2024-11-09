@@ -44,6 +44,6 @@ Page {
 				**La interfaz de usuario de la aplicación de navegador desaparecerá hasta que reinicie el navegador.**"
 		}
     		Spacer { weight: 1 }
-   		Button { label: "Volver a la página de inicio" link: "page:home" }
+   		Button { label: "Volver a la página de inicio" link: "page:app.home" }
 	}
 }

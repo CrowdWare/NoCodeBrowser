@@ -33,6 +33,6 @@ Page {
 				to your dreams."}
 
 		Spacer { weight: 1 }
-		Button { label: "About NoCode" link: "page:about"}
+		Button { label: "About NoCode" link: "page:app.about"}
 	}
 }

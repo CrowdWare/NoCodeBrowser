@@ -103,10 +103,12 @@ fun DrawerSheet(
 
                         NavigationDrawerItem(
                             icon = {
-                                Icon(
-                                    items[index].icon!!,
-                                    contentDescription = items[index].text
-                                )
+                                if(items[index].icon != null) {
+                                    Icon(
+                                        items[index].icon!!,
+                                        contentDescription = items[index].text
+                                    )
+                                }
                             },
                             label = { Text(items[index].text) },
                             selected = items[index].text == selectedItem.value,

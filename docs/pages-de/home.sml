@@ -36,6 +36,6 @@ Page {
 				Ihren Träumen näher zu kommen."}
 
 		Spacer { weight: 1 }
-		Button { label: "Über NoCode" link: "page:about"}
+		Button { label: "Über NoCode" link: "page:app.about"}
 	}
 }

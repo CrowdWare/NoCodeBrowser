@@ -97,7 +97,7 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
                         navTarget.value = ""
                     }
                     "app.about" -> {
-                        title.value = "About"
+                        title.value = stringResource(R.string.about)
                         navTarget.value = ""
                     }
 

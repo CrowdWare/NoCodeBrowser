@@ -44,6 +44,6 @@ Page {
 				**La uzantointerfaco de la retumila apo malaperos ĝis vi restartigos la retumilon.**"
 		}
     		Spacer { weight: 1 }
-   		Button { label: "Reen al la Hejmpaĝo" link: "page:home" }
+   		Button { label: "Reen al la Hejmpaĝo" link: "page:app.home" }
 	}
 }
