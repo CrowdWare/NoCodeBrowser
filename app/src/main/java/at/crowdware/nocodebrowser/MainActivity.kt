@@ -68,11 +68,12 @@ class MainActivity : ComponentActivity() {
     val contentLoader = ContentLoader()
     private var app: App? by mutableStateOf(null)
     private var loading by mutableStateOf(false)
-    private val url = "https://crowdware.github.io/NoCodeBrowser/app.sml"
     var cameraDistance: Float = 0F
 
     companion object {
         init { Utils.init() }
+
+        const val url = "https://crowdware.github.io/NoCodeBrowser/app.sml"
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -90,7 +91,7 @@ class MainActivity : ComponentActivity() {
             // load the dynamic app, we can change the content on the web server
             if (!loading) {
                 loading = true
-                app = contentLoader.loadApp(url)
+                app = contentLoader.loadApp(Companion.url)
             }
             if (app != null) {
                 enableEdgeToEdge()

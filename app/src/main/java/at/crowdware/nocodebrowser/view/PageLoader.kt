@@ -142,14 +142,14 @@ fun LoadPage(
                         )
                     }
             ) {
-                if (showSettingsDialog) {
+                if (showSettingsDialog && mainActivity.contentLoader.appUrl != MainActivity.url.substringBefore("/app.sml")) {
                     SettingsDialog(
                         onDismiss = {showSettingsDialog = false},
                         onConfirm = {
                         showSettingsDialog = false
                         scope.launch {
                             withContext(Dispatchers.IO) {
-                                mainActivity.contentLoader.switchApp("https://crowdware.github.io/NoCodeBrowser/app.sml")
+                                mainActivity.contentLoader.switchApp(MainActivity.url)
                             }
                             NavigationManager.navigate("home")
                         }
