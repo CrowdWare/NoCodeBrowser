@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.time.LocalDateTime
 import java.util.Properties
 
@@ -34,6 +35,13 @@ val version = "$majorVersion.$yearPart$monthPart.$dayPart$hourPart$minutesPart".
 android {
     namespace = "at.crowdware.nocodebrowser"
     compileSdk = 34
+
+    sourceSets {
+        // Configure the `main` source set to include the custom directory
+        getByName("main") {
+            kotlin.srcDir(layout.buildDirectory.dir("generated/version"))
+        }
+    }
 
     defaultConfig {
         androidResources {
@@ -135,17 +143,17 @@ tasks.named("assemble") {
 
 tasks.register("generateVersionFile") {
     val outputDir = layout.buildDirectory.dir("generated/version").get().asFile
-    val versionValue = version
+    val versionValue = version // Assuming `version` is a valid property in your project
 
     inputs.property("version", versionValue)
     outputs.dir(outputDir)
 
     doLast {
-        // Schreibe die Versionsnummer in die Datei
+        // Write the version number to the generated file
         val versionFile = outputDir.resolve("Version.kt")
-        versionFile.parentFile.mkdirs()
+        versionFile.parentFile.mkdirs() // Create the directory if it doesn't exist
         versionFile.writeText("""
-            package at.crowdware.nocodedesigner
+            package at.crowdware.nocodebrowser
 
             object Version {
                 const val version = "$versionValue"
@@ -155,6 +163,11 @@ tasks.register("generateVersionFile") {
     }
 }
 
+// Ensure that generateVersionFile is run before compileDebugKotlin
+tasks.withType<KotlinCompile> {
+    dependsOn("generateVersionFile")
+    inputs.dir(layout.buildDirectory.dir("generated/version"))
+}
 tasks.named("build") {
     dependsOn("generateVersionFile")
 }

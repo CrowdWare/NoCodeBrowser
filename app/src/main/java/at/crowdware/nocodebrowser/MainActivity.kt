@@ -142,7 +142,8 @@ class MainActivity : ComponentActivity() {
                                         list.add(
                                             NavigationItem(
                                                 file.path.substringBefore(".sml"),
-                                                contentLoader.appUrl
+                                                contentLoader.appUrl,
+                                                text = file.title
                                             )
                                         )
                                     }

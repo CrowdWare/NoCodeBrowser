@@ -71,7 +71,7 @@ data class DeploymentElement(
     val files: MutableList<FileElement> = mutableListOf()
 )
 
-data class FileElement(val path: String, val time: LocalDateTime, val type: String)
+data class FileElement(val path: String, val time: LocalDateTime, val type: String, val title: String)
 
 data class PageElement (val src: String)
 

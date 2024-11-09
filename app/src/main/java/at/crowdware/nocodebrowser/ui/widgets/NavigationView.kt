@@ -22,6 +22,7 @@ package at.crowdware.nocodebrowser.ui.widgets
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
+import android.os.Build.VERSION
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -50,11 +51,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import at.crowdware.nocodebrowser.MainActivity
 import at.crowdware.nocodebrowser.R
+import at.crowdware.nocodebrowser.Version
 import at.crowdware.nocodebrowser.ui.theme.OnPrimary
 import at.crowdware.nocodebrowser.ui.theme.Primary
 import at.crowdware.nocodebrowser.view.LoadPage
@@ -64,6 +67,7 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -218,7 +222,7 @@ fun About(openDialog: Boolean, onDismiss: () -> Unit) {
     if (openDialog) {
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text(text = stringResource(R.string.about_shift)) },
+            title = { Text(fontSize = 18.sp, text = "NoCodeBrowser " + Version.version) },
             text = {
                 Text(
                     stringResource(R.string.about_dialog_text)
