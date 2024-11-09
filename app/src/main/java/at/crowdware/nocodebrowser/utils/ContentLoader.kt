@@ -201,7 +201,6 @@ class ContentLoader {
         // Check if pre cached file exists
         if (file.exists()) {
             fileContent = file.readText()
-            println("using cached: $fileContent")
         }
 
         if (!fileContent.contains("at.crowdware.nocodebrowser") || fileContent.isEmpty()) {
@@ -209,7 +208,7 @@ class ContentLoader {
             var appContent = downloadSml(url)
             if (appContent != null) {
                 if (fileContent != appContent) {
-                    // Write new content to the cache if it has changed
+                    // Write new content to the cache if it has changed, in case web server is offline
                     file.writeText(appContent)
                 }
             } else {

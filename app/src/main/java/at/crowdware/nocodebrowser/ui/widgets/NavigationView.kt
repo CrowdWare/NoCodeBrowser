@@ -85,7 +85,7 @@ fun NavigationView(items: MutableList<NavigationItem>, mainActivity: MainActivit
 
     NavHost(
         navController = navController,
-        startDestination = "home",
+        startDestination = "app.home",
         modifier = Modifier
             .background(color = navhostBackground.value)
             .systemBarsPadding()) {

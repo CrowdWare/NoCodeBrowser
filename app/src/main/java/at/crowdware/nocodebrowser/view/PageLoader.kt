@@ -151,7 +151,7 @@ fun LoadPage(
                             withContext(Dispatchers.IO) {
                                 mainActivity.contentLoader.switchApp(MainActivity.url)
                             }
-                            NavigationManager.navigate("home")
+                            NavigationManager.navigate("app.home")
                         }
 
                     })
