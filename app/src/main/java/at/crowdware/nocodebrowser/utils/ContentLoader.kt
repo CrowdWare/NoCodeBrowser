@@ -21,6 +21,8 @@ package at.crowdware.nocodebrowser.utils
 import android.os.Build
 import androidx.annotation.RequiresApi
 import at.crowdware.nocodebrowser.MainActivity
+import at.crowdware.nocodebrowser.logic.LocaleManager
+import at.crowdware.nocodebrowser.logic.PersistanceManager
 import at.crowdware.nocodebrowser.parseApp
 import at.crowdware.nocodebrowser.parsePage
 import at.crowdware.nocodebrowser.ui.App
@@ -36,7 +38,6 @@ import java.time.ZoneId
 data class Link(val titel: String, val url: String)
 
 class ContentLoader {
-
     private lateinit var okHttpClient: OkHttpClient
     private lateinit var context: MainActivity
     var app: App? = null
@@ -124,15 +125,20 @@ class ContentLoader {
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun loadPage(name: String): Page? {
+        var lang = LocaleManager.getLanguage()
+        if (lang == "en")
+            lang = ""
+        else
+            lang = "-$lang"
         var fileContent = ""
-        val url = "$appUrl/pages/$name.sml"
+        val url = "$appUrl/pages$lang/$name.sml"
         if (app == null)
             return null
         val result = app!!.deployment.files.find { it.path == "$name.sml" }
         if (result == null) {
             return null
         }
-        val fileName = ("ContentCache/" + appUrl.substringAfter("://") + "/pages/$name").replace(".", "_").replace(":", "_") + ".sml"
+        val fileName = ("ContentCache/" + appUrl.substringAfter("://") + "/pages$lang/$name").replace(".", "_").replace(":", "_") + ".sml"
         val file = File(context.filesDir, fileName)
         fileContent = if (file.exists()) {
             val lastModifiedMillis = file.lastModified()

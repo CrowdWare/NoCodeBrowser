@@ -39,16 +39,34 @@ App {
 
 // deployment start - don't edit here
 Deployment {
-  File { path: "about.sml" time: "2024.10.16 06.39.16" }
-  File { path: "video.sml" time: "2024.10.16 03.52.20" }
-  File { path: "home.sml" time: "2024.10.16 14.27.28" }
-  File { path: "desktop.png" time: "2024.10.14 09.37.53" }
-  File { path: "ship.png" time: "2024.09.03 09.08.18" }
-  File { path: "menu.png" time: "2024.10.16 05.50.12" }
-  File { path: "art_anyona.jpg" time: "2024.10.15 00.52.04" }
-  File { path: "olaf.jpg" time: "2023.06.11 04.47.15" }
-  File { path: "birds39-forest-20772.mp3" time: "2024.10.13 16.14.46" }
-  File { path: "beach.mp4" time: "2024.09.13 17.31.39" }
+  File { title: "title" path: "about.sml" time: "2024.11.09 15.33.02" type: "page" }
+  File { title: "title" path: "video.sml" time: "2024.11.09 06.55.24" type: "page" }
+  File { title: "title" path: "home.sml" time: "2024.11.09 15.33.03" type: "page" }
+  File { title: "title" path: "about.sml" time: "2024.11.09 07.30.21" type: "page-de" }
+  File { title: "title" path: "home.sml" time: "2024.11.09 07.30.07" type: "page-de" }
+  File { title: "title" path: "about.sml" time: "2024.11.09 15.35.59" type: "page-es" }
+  File { title: "title" path: "home.sml" time: "2024.11.09 15.37.55" type: "page-es" }
+  File { title: "title" path: "about.sml" time: "2024.11.09 15.44.54" type: "page-pt" }
+  File { title: "title" path: "home.sml" time: "2024.11.09 15.46.00" type: "page-pt" }
+  File { title: "title" path: "about.sml" time: "2024.11.09 15.40.28" type: "page-fr" }
+  File { title: "title" path: "home.sml" time: "2024.11.09 15.41.41" type: "page-fr" }
+  File { title: "title" path: "about.sml" time: "2024.11.09 15.32.43" type: "page-eo" }
+  File { title: "title" path: "home.sml" time: "2024.11.09 15.33.50" type: "page-eo" }
+
+
+
+
+
+
+  File { title: "title" path: "desktop.png" time: "2024.10.14 09.37.53" type: "image" }
+  File { title: "title" path: "ship.png" time: "2024.09.03 09.08.18" type: "image" }
+  File { title: "title" path: "menu.png" time: "2024.10.16 05.50.12" type: "image" }
+  File { title: "title" path: "art_anyona.jpg" time: "2024.10.15 00.52.04" type: "image" }
+  File { title: "title" path: "olaf.jpg" time: "2023.06.11 04.47.15" type: "image" }
+  File { title: "title" path: "birds39-forest-20772.mp3" time: "2024.10.13 16.14.46" type: "sound" }
+  File { title: "title" path: "beach.mp4" time: "2024.09.13 17.31.39" type: "video" }
+
+
 }
 // deployment end
 }

@@ -42,10 +42,10 @@ Deployment {{
 
     with open(app_sml_path, 'w') as file:
         file.write(app_sml_content)
-        
-        
+
+
 """gets a list of files and there last change date"""
-def generate_deployment_data(base_path, exclude_files=None):
+def generate_deployment_data(type, base_path, exclude_files=None):
     if exclude_files is None:
         exclude_files = []
 
@@ -53,10 +53,11 @@ def generate_deployment_data(base_path, exclude_files=None):
     for dirpath, _, filenames in os.walk(base_path):
         for filename in filenames:
             if filename not in exclude_files and not filename.startswith('.'):
+                title = "title"
                 file_path = os.path.relpath(os.path.join(dirpath, filename), base_path)
                 mod_time = os.path.getmtime(os.path.join(dirpath, filename))
                 formatted_time = datetime.utcfromtimestamp(mod_time).strftime('%Y.%m.%d %H.%M.%S')
-                deployment_entries.append(f'  File {{ path: "{file_path}" time: "{formatted_time}" }}')
+                deployment_entries.append(f'  File {{ title: "{title}" path: "{file_path}" time: "{formatted_time}" type: "{type}" }}')
 
     return "\n".join(deployment_entries)
 
@@ -66,21 +67,45 @@ def update():
     app_sml_path = os.path.join(base_path, 'app.sml')
 
     pages_path = os.path.join(base_path, 'pages')
+    pages_de_path = os.path.join(base_path, 'pages-de')
+    pages_es_path = os.path.join(base_path, 'pages-es')
+    pages_pt_path = os.path.join(base_path, 'pages-pt')
+    pages_fr_path = os.path.join(base_path, 'pages-fr')
+    pages_eo_path = os.path.join(base_path, 'pages-eo')
+    parts_path = os.path.join(base_path, 'parts')
+    parts_de_path = os.path.join(base_path, 'parts-de')
+    parts_es_path = os.path.join(base_path, 'parts-es')
+    parts_pt_path = os.path.join(base_path, 'parts-pt')
+    parts_fr_path = os.path.join(base_path, 'parts-fr')
+    parts_eo_path = os.path.join(base_path, 'parts-eo')
     images_path = os.path.join(base_path, 'images')
     sounds_path = os.path.join(base_path, 'sounds')
     videos_path = os.path.join(base_path, 'videos')
+    textures_path = os.path.join(base_path, 'textures')
+    models_path = os.path.join(base_path, 'models')
 
-    deployment_data = generate_deployment_data(pages_path, exclude_files=['.DS_Store'])
-    deployment_data += "\n" + generate_deployment_data(images_path, exclude_files=['.DS_Store'])
-    deployment_data += "\n" + generate_deployment_data(sounds_path, exclude_files=['.DS_Store'])
-    deployment_data += "\n" + generate_deployment_data(videos_path, exclude_files=['.DS_Store'])
-    
+    deployment_data = generate_deployment_data("page", pages_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("page-de", pages_de_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("page-es", pages_es_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("page-pt", pages_pt_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("page-fr", pages_fr_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("page-eo", pages_eo_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("part", parts_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("part-de", parts_de_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("part-es", parts_es_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("part-pt", parts_pt_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("part-fr", parts_fr_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("part-eo", parts_eo_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("image", images_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("sound", sounds_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("video", videos_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("texture", textures_path, exclude_files=['.DS_Store'])
+    deployment_data += "\n" + generate_deployment_data("model", models_path, exclude_files=['.DS_Store'])
 
     print("Updating app.sml with deployment files...")
     update_deployment(app_sml_path, deployment_data)
-    
-    
+
+
 if __name__ == "__main__":
     update()
 
-   
