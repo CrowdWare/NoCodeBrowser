@@ -53,11 +53,10 @@ def generate_deployment_data(type, base_path, exclude_files=None):
     for dirpath, _, filenames in os.walk(base_path):
         for filename in filenames:
             if filename not in exclude_files and not filename.startswith('.'):
-                title = "title"
                 file_path = os.path.relpath(os.path.join(dirpath, filename), base_path)
                 mod_time = os.path.getmtime(os.path.join(dirpath, filename))
                 formatted_time = datetime.utcfromtimestamp(mod_time).strftime('%Y.%m.%d %H.%M.%S')
-                deployment_entries.append(f'  File {{ title: "{title}" path: "{file_path}" time: "{formatted_time}" type: "{type}" }}')
+                deployment_entries.append(f'  File {{ path: "{file_path}" time: "{formatted_time}" type: "{type}" }}')
 
     return "\n".join(deployment_entries)
 

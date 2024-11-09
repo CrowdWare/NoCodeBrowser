@@ -139,15 +139,16 @@ class MainActivity : ComponentActivity() {
                                 // navigation targets which are not listed in the drawer
                                 for (file in app!!.deployment.files) {
                                     if (file.path.endsWith(".sml")) {
+                                        println("title: ${file.path} ${file.title}")
                                         list.add(
                                             NavigationItem(
                                                 file.path.substringBefore(".sml"),
-                                                contentLoader.appUrl
+                                                contentLoader.appUrl,
+                                                text = file.title
                                             )
                                         )
                                     }
                                 }
-
                                 NavigationView(list, context)
                             }
                         } else {
