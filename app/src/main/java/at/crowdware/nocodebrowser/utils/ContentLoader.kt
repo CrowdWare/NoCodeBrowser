@@ -198,12 +198,15 @@ class ContentLoader {
             parentDir.mkdirs()
         }
 
-        // Check if pre cached file exists
+        // load last saved version in case webserver is offline
         if (file.exists()) {
             fileContent = file.readText()
         }
 
-        if (fileContent.isEmpty()) {
+        if(fileContent.contains("precached")) {
+            app = parseApp(fileContent)
+            appLoaded = true
+        } else {
             // Download content from the URL
             var appContent = downloadSml(url)
             if (appContent != null) {
@@ -223,10 +226,6 @@ class ContentLoader {
                 app = parseApp(appContent)
                 appLoaded = true
             }
-        } else {
-            // use pre cached version
-            app = parseApp(fileContent)
-            appLoaded = true
         }
         return@withContext app
     }
