@@ -7,7 +7,7 @@ Page {
 						
 		Markdown {
 			color: "#4C9BD9"
-			text: "# Bem-vindo"
+			text: "# Bem-vindo (beta)"
   		}
   		Markdown { 
       		fontSize: 16
