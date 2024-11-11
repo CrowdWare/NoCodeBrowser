@@ -203,7 +203,7 @@ class ContentLoader {
             fileContent = file.readText()
         }
 
-        if (!fileContent.contains("at.crowdware.nocodebrowser") || fileContent.isEmpty()) {
+        if (fileContent.isEmpty()) {
             // Download content from the URL
             var appContent = downloadSml(url)
             if (appContent != null) {

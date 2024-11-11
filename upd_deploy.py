@@ -106,5 +106,7 @@ def update():
 
 
 if __name__ == "__main__":
+    os.chdir("docs")
     update()
+    os.chdir("..")
 

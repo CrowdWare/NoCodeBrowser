@@ -18,6 +18,7 @@
 #
 
 import socket
+import os
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from upd_deploy import update
 
@@ -50,8 +51,10 @@ def start_web_server(port=8000):
 
 
 if __name__ == "__main__":
+    os.chdir("docs")
     print("Updating app.sml with deployment files...")
     update()
 
     print("Starting the web server...")
     start_web_server(port=8000)
+    os.chdir("..")

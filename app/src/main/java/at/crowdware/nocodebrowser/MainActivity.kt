@@ -99,7 +99,6 @@ class MainActivity : ComponentActivity() {
                     NoCodeBrowserTheme(app!!.theme) {
                         LocaleManager.init(applicationContext, resources)
 
-
                         if(app!!.id == "at.crowdware.nocodebrowser") {
                             // in the local app we use Scaffold and the navigation drawer
                             Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
