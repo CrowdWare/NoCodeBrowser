@@ -1,0 +1,24 @@
+<resources>
+    <string name="icon">Icon</string>
+    <string name="home">Home</string>
+    <string name="settings">Settings</string>
+    <string name="navigation_home">Startseite</string>
+    <string name="navigation_about">Über uns</string>
+    <string name="about">FreeBookReader</string>
+    <string name="about_dialog_text">NoCodeLibMobile ist eine einfache Möglichkeit dynamisch Bücher über das Internet zu laden, zu testen und auszuführen.\nDas bedeutet die komplette Buch wird auf einem Webserver installiert und der Inhalt wir automatisch von der App runtergeladen.</string>
+    <string name="personal_data">Personal Data</string>
+    <string name="select_preferred_language">Select preferred language</string>
+    <string name="language_english">English</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_portugues">Português</string>
+    <string name="language_esperanto">Esperanto</string>
+    <string name="links">Links</string>
+    <string name="add_link">Add Link</string>
+    <string name="title">Title</string>
+    <string name="url">Url</string>
+    <string name="add_new_link">Add new link</string>
+    <string name="navigation_books">Books</string>
+</resources>
+

@@ -1,0 +1,22 @@
+<resources>
+    <string name="icon">Ikono</string>
+    <string name="home">Hejmo</string>
+    <string name="settings">Agordoj</string>
+    <string name="navigation_home">Ĉefpaĝo</string>
+    <string name="navigation_about">Pri ni</string>
+    <string name="about">Pri</string>
+    <string name="about_dialog_text">NoCodeLibMobile estas facila maniero por dinamike ŝargi, testi, kaj ekzekuti librojn per la interreto.\nTio signifas, ke la tuta libro estas instalita sur retservilo, kaj la enhavo estas aŭtomate elŝutata de la aplikaĵo.</string><string name="personal_data">Personaj Datumoj</string>
+    <string name="select_preferred_language">Elektu preferatan lingvon</string>
+    <string name="language_english">Angla</string>
+    <string name="language_german">Germana</string>
+    <string name="language_spanish">Hispana</string>
+    <string name="language_french">Franca</string>
+    <string name="language_portugues">Portugala</string>
+    <string name="language_esperanto">Esperanto</string>
+    <string name="links">Ligiloj</string>
+    <string name="add_link">Aldoni Ligon</string>
+    <string name="title">Titolo</string>
+    <string name="url">URL</string>
+    <string name="add_new_link">Aldoni novan ligon</string>
+    <string name="navigation_books">Libroj</string>
+</resources>
